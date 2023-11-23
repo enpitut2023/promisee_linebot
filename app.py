@@ -13,8 +13,13 @@ import os, dotenv
 
 app = Flask(__name__)
 
-line_bot_api = os.environ["CHANNEL_ACCESS_TOKEN"]
-handler = os.environ["CHANNEL_SECRET"]
+dotenv.load_dotenv()
+CHANNEL_ACCESS_TOKEN = os.environ["CHANNEL_ACCESS_TOKEN"]
+CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
+ 
+line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
+handler = WebhookHandler(CHANNEL_SECRET)
+
 
 @app.route("/")
 def hello():
