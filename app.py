@@ -21,9 +21,7 @@ line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
 
-@app.route("/")
-def hello():
-    return render_template("index.html")
+
 
 
 @app.route("/callback", methods=['POST'])
@@ -40,7 +38,7 @@ def callback():
         handler.handle(body, signature)
     except InvalidSignatureError:
         print("Invalid signature. Please check your channel access token/channel secret.")
-        abort(200)
+        abort(400)
 
     return 'OK'
 
