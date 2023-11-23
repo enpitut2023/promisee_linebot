@@ -9,11 +9,12 @@ from linebot.exceptions import (
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
 )
+import os, dotenv
 
 app = Flask(__name__)
 
-line_bot_api = LineBotApi('アクセストークン')
-handler = WebhookHandler('チャネルシークレット')
+line_bot_api = os.environ["CHANNEL_ACCESS_TOKEN"]
+handler = os.environ["CHANNEL_SECRET"]
 
 @app.route("/")
 def hello():
