@@ -1,4 +1,4 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort, render_template
 
 from linebot import (
     LineBotApi, WebhookHandler
@@ -14,6 +14,10 @@ app = Flask(__name__)
 
 line_bot_api = LineBotApi('アクセストークン')
 handler = WebhookHandler('チャネルシークレット')
+
+@app.route("/")
+def hello():
+    return render_template("index.html")
 
 
 @app.route("/callback", methods=['POST'])
