@@ -43,16 +43,14 @@ def callback():
     return 'OK'
 
 
-import datetime
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     text = event.message.text
-    user_mentions = event.message.mention
+    mention = event.message.mention
     # メンションされたユーザーの表示名やユーザーIDなどを取得
-    for mention in user_mentions:
-        user_id = mention["userId"]
-        display_name = mention["displayName"]
-        line_bot_api.reply_message(
+    user_id = mention["userId"]
+    display_name = mention["displayName"]
+    line_bot_api.reply_message(
             event.reply_token,
             TextMessage(text=f"メンションされたユーザー: {display_name} (ID: {user_id})")
         )
