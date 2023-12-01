@@ -89,11 +89,12 @@ def handle_postback(event):
     if postback_data == "yes":
         
         # ここにYesが選択されたときの処理を追加
-        text1 = event.message.text 
+        # text1 = event.message.text 
         text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
             
         url="https://gift.line.me/item/6517019"
         text = text1 + " " +text2 + "\n" + url
+
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=text)
