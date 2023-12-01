@@ -16,8 +16,11 @@ import os, dotenv
 app = Flask(__name__)
 
 dotenv.load_dotenv()
-CHANNEL_ACCESS_TOKEN = os.environ["CHANNEL_ACCESS_TOKEN"]
-CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
+# CHANNEL_ACCESS_TOKEN = os.environ["CHANNEL_ACCESS_TOKEN"]
+# CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
+
+CHANNEL_ACCESS_TOKEN = "Z1Azp+0SWGbiZDlKrmFeqUQCdFK0GsYguAx5IZxLF8kQKhaEiH15U6NKglY6lrqsdi0CmjtrrROj/WrZHqvnxaK57e0+UxSxfxeKPeQe3DiLZQyNUNoh8vU672Uixibk+hJdDl8fOcFx9StvDs1jBgdB04t89/1O/w1cDnyilFU="
+CHANNEL_SECRET = "d2451ec1d86379bc572a48672c77a929"
  
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
