@@ -7,7 +7,7 @@ from linebot.exceptions import (
     InvalidSignatureError
 )
 
-from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessageß
+from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage
 
 app = Flask(__name__)
 
@@ -21,6 +21,7 @@ CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
  
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
+
 
 
 
@@ -60,15 +61,13 @@ def handle_message(event):
         line_bot_api.reply_message(event.reply_token, template_message)
 
 
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-    text1 = event.message.text 
-    text2 = "間に合った人にline詫びギフトを送りましょう(>_<;)"
-
-    url="https://gift.line.me/item/6517019"
-    text = text1 + "\n" + text2 + "\n" +url
     # テキストの最初の文字が@の場合、同じテキストを鸚鵡返し
-    if text.startswith('@'):
+    elif text.startswith('@'):
+        text1 = event.message.text 
+        text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
+            
+        url="https://gift.line.me/item/6517019"
+        text = text1 + " " +text2 + "\n" + url
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=text)
