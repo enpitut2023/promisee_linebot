@@ -7,11 +7,11 @@ from linebot.exceptions import (
     InvalidSignatureError
 )
 
-from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent
+from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup
 
 app = Flask(__name__)
 
-import os, dotenv
+import os, dotenv, requests
 
 app = Flask(__name__)
 
@@ -22,6 +22,17 @@ CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
+# グループメンバーのプロフィール情報を取得する関数
+def get_group_members(group_id):
+    members = []
+    url = f'https://api.line.me/v2/bot/group/{group_id}/members/ids'
+    headers = {
+        'Authorization': f'Bearer {CHANNEL_ACCESS_TOKEN}'
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        members = response.json()['memberIds']
+    return members
 
 
 
@@ -45,20 +56,44 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    if isinstance(event.source, SourceGroup):
+        group_id = event.source.group_id
     # 受け取ったメッセージがテキストの場合、確認テンプレートを送信する
     if event.message.text.lower() == "confirm":
+        # グループのメンバーIDを取得
+        group_members = get_group_members(group_id)
+
+        # メンバーIDを元にプロフィール情報を取得
+        profiles = []
+        for member_id in group_members:
+            profile = line_bot_api.get_profile(member_id)
+            profiles.append(profile.display_name)
+            # PostbackActionのリスト
+            actions = []
+
+            for member_id in profiles:
+                profile = line_bot_api.get_profile(member_id)
+                display_name = profile.display_name
+                
+                # ラベルが表示名となるPostbackActionを作成
+                action = PostbackAction(label=display_name, data=display_name)
+                actions.append(action)
+
         confirm_template = ConfirmTemplate(
-            text="約束に間に合いましたか?",
-            actions=[
-                PostbackAction(label="Yes", data="yes"),
-                PostbackAction(label="No", data="no")
-            ]
+            text="約束に間に合わなかった人は?",
+            actions=actions + [PostbackAction(label="いない", data="no")]
         )
         template_message = TemplateSendMessage(
             alt_text="this is a confirm template",
             template=confirm_template
         )
         line_bot_api.reply_message(event.reply_token, template_message)
+
+
+        # # ユーザー名のリストを文字列に変換して送信
+        # member_names = '\n'.join(profiles)
+        # reply_message = TextSendMessage(text=f'グループメンバー:\n{member_names}')
+        # line_bot_api.reply_message(event.reply_token, reply_message)
 
 
     # テキストの最初の文字が@の場合、同じテキストを鸚鵡返し
@@ -73,11 +108,6 @@ def handle_message(event):
     #         TextSendMessage(text=text)
     #     )
 
-        # if event.source.type == "group":
-        #     group_id = event.source.group_id
-        #     member_ids_res = line_bot_api.get_group_member_ids(group_id)
-        #     member_ids = member_ids_res.member_ids
-        #     reply_text = f"Group ID: {group_id}, Member IDs: {member_ids}"
     
 
 # ポストバックイベントのハンドラ
@@ -86,14 +116,14 @@ def handle_postback(event):
     postback_data = event.postback.data
 
     # ポストバックデータに応じた処理
-    if postback_data == "yes":
+    if postback_data != "no":
         
         # ここにYesが選択されたときの処理を追加
-        # text1 = event.message.text 
+        text1 = postback_data
         text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
             
         url="https://gift.line.me/item/6517019"
-        text = text2 + "\n" + url
+        text = text1 + " " + text2 + "\n" + url
 
         line_bot_api.reply_message(
             event.reply_token,
@@ -102,21 +132,6 @@ def handle_postback(event):
     elif postback_data == "no":
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="Noが選択されました"))
         # ここにNoが選択されたときの処理を追加
-
-# # LINE Messaging APIのチャンネルアクセストークン
-# channel_access_token = 'ここにあなたのチャンネルアクセストークンを入力'
-
-# # グループIDとユーザーID
-# group_id = 'ここにグループIDを入力'
-# user_id = 'ここにユーザーIDを入力'
-
-# # APIエンドポイント
-# api_url = f'https://api.line.me/v2/bot/group/{group_id}/member/{user_id}'
-
-# # ヘッダーにチャンネルアクセストークンを設定
-# headers = {
-#     'Authorization': f'Bearer {channel_access_token}'
-# }
 
     
 if __name__ == "__main__":
