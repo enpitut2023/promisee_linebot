@@ -43,17 +43,17 @@ def callback():
     return 'OK'
 
 
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     text = event.message.text
-    mention = event.message.mention
-    # メンションされたユーザーの表示名やユーザーIDなどを取得
-    user_id = mention["userId"]
-    display_name = mention["displayName"]
-    line_bot_api.reply_message(
+    # テキストの最初の文字が@の場合、同じテキストを鸚鵡返し
+    if text.startswith('@'):
+        line_bot_api.reply_message(
             event.reply_token,
-            TextMessage(text=f"メンションされたユーザー: {display_name} (ID: {user_id})")
+            TextSendMessage(text=text)
         )
+
 
     
 if __name__ == "__main__":
