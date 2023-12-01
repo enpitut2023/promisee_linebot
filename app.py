@@ -87,7 +87,7 @@ def handle_postback(event):
 
     # ポストバックデータに応じた処理
     if postback_data == "yes":
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="Yesが選択されました"))
+        
         # ここにYesが選択されたときの処理を追加
         text1 = event.message.text 
         text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
@@ -102,20 +102,20 @@ def handle_postback(event):
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="Noが選択されました"))
         # ここにNoが選択されたときの処理を追加
 
-# LINE Messaging APIのチャンネルアクセストークン
-channel_access_token = 'ここにあなたのチャンネルアクセストークンを入力'
+# # LINE Messaging APIのチャンネルアクセストークン
+# channel_access_token = 'ここにあなたのチャンネルアクセストークンを入力'
 
-# グループIDとユーザーID
-group_id = 'ここにグループIDを入力'
-user_id = 'ここにユーザーIDを入力'
+# # グループIDとユーザーID
+# group_id = 'ここにグループIDを入力'
+# user_id = 'ここにユーザーIDを入力'
 
-# APIエンドポイント
-api_url = f'https://api.line.me/v2/bot/group/{group_id}/member/{user_id}'
+# # APIエンドポイント
+# api_url = f'https://api.line.me/v2/bot/group/{group_id}/member/{user_id}'
 
-# ヘッダーにチャンネルアクセストークンを設定
-headers = {
-    'Authorization': f'Bearer {channel_access_token}'
-}
+# # ヘッダーにチャンネルアクセストークンを設定
+# headers = {
+#     'Authorization': f'Bearer {channel_access_token}'
+# }
 
     
 if __name__ == "__main__":
