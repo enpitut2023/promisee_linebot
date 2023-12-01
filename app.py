@@ -10,7 +10,7 @@ from linebot.exceptions import (
 from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction
 
 app = Flask(__name__)
-)
+
 import os, dotenv
 
 app = Flask(__name__)
@@ -49,7 +49,7 @@ def handle_message(event):
     # 受け取ったメッセージがテキストの場合、確認テンプレートを送信する
     if event.message.text.lower() == "confirm":
         confirm_template = ConfirmTemplate(
-            text="Are you sure?",
+            text="約束に間に合いましたか?",
             actions=[
                 PostbackAction(label="Yes", data="yes"),
                 PostbackAction(label="No", data="no")
