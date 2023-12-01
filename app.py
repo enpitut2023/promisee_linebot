@@ -69,7 +69,7 @@ def handle_message(event):
             profile = line_bot_api.get_profile(member_id)
             profiles.append(profile.display_name)
             # PostbackActionのリスト
-            actions = []
+            user_actions = []
 
         for member_id in profiles:
             profile = line_bot_api.get_profile(member_id)
@@ -77,11 +77,11 @@ def handle_message(event):
                 
             # ラベルが表示名となるPostbackActionを作成
             action = PostbackAction(label=display_name, data=display_name)
-            actions.append(action)
+            user_actions.append(action)
 
         confirm_template = ConfirmTemplate(
             text="約束に間に合わなかった人は?",
-            actions=actions + [PostbackAction(label="いない", data="no")]
+            actions=user_actions + [PostbackAction(label="いない", data="no")]
         )
         template_message = TemplateSendMessage(
             alt_text="this is a confirm template",
