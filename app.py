@@ -24,7 +24,6 @@ handler = WebhookHandler(CHANNEL_SECRET)
 
 
 
-
 @app.route("/callback", methods=['POST'])
 def callback():
     # ラインからのPOSTかを判定
@@ -64,10 +63,10 @@ def handle_message(event):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     text1 = event.message.text 
-    text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
-    
+    text2 = "間に合った人にline詫びギフトを送りましょう(>_<;)"
+
     url="https://gift.line.me/item/6517019"
-    text = text1 + " " +text2 + url
+    text = text1 + "\n" + text2 + "\n" +url
     # テキストの最初の文字が@の場合、同じテキストを鸚鵡返し
     if text.startswith('@'):
         line_bot_api.reply_message(
