@@ -7,7 +7,7 @@ from linebot.exceptions import (
     InvalidSignatureError
 )
 
-from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessageß
+from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage
 
 app = Flask(__name__)
 
@@ -67,7 +67,7 @@ def handle_message(event):
     text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
     
     url="https://gift.line.me/item/6517019"
-    text = text1 + " " +text2 + url
+    text = text1 + " " +text2 + "\n" + url
     # テキストの最初の文字が@の場合、同じテキストを鸚鵡返し
     if text.startswith('@'):
         line_bot_api.reply_message(
