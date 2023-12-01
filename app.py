@@ -26,10 +26,10 @@ handler = WebhookHandler(CHANNEL_SECRET)
 
 @app.route("/callback", methods=['POST'])
 def callback():
-    # get X-Line-Signature header value
+    # ラインからのPOSTかを判定
     signature = request.headers['X-Line-Signature']
 
-    # get request body as text
+    # テキストを受け取ってる
     body = request.get_data(as_text=True)
     app.logger.info("Request body: " + body)
 
@@ -46,13 +46,17 @@ def callback():
 import datetime
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    if event.message.text == '現在時刻':
-        reply_message = datetime.datetime.now().strftime('%Y年%m月%d日 %H:%M:%Sです')
-    else:
-        reply_message = "「現在時刻」と送信してください。"
-    line_bot_api.reply_message(
+    text = event.message.text
+    user_mentions = event.message.mention
+    # メンションされたユーザーの表示名やユーザーIDなどを取得
+    for mention in user_mentions:
+        user_id = mention["userId"]
+        display_name = mention["displayName"]
+        line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text=reply_message))
+            TextMessage(text=f"メンションされたユーザー: {display_name} (ID: {user_id})")
+        )
+
     
 if __name__ == "__main__":
     app.run()
