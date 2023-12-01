@@ -62,17 +62,10 @@ def handle_message(event):
     if event.message.text.lower() == "confirm":
         # グループのメンバーIDを取得
         group_members = get_group_members(group_id)
-
-        # メンバーIDを元にプロフィール情報を取得
-        profiles = []
+        user_actions = []
         for member_id in group_members:
             profile = line_bot_api.get_profile(member_id)
-            profiles.append(profile.display_name)
-            # PostbackActionのリスト
-            user_actions = []
-
-        for member_id in profiles:
-            profile = line_bot_api.get_profile(member_id)
+            
             display_name = profile.display_name
                 
             # ラベルが表示名となるPostbackActionを作成
