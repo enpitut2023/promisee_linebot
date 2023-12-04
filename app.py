@@ -14,7 +14,7 @@ app = Flask(__name__)
 import os, dotenv, requests
 
 app = Flask(__name__)
-
+button_disabled=False
 dotenv.load_dotenv()
 CHANNEL_ACCESS_TOKEN = os.environ["CHANNEL_ACCESS_TOKEN"]
 CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
@@ -105,6 +105,7 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     if event.message.text.lower() == "確認":
+        button_disabled=False
         # 確認テンプレートの作成
         confirm_template = ConfirmTemplate(
             text="約束に間に合いましたか?",
@@ -126,7 +127,7 @@ def handle_postback(event):
     postback_data = event.postback.data
 
     # ポストバックデータに応じた処理
-    if postback_data == "no":
+    if postback_data == "no" and not button_disabled:
         
         # ここにYesが選択されたときの処理を追加
         text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
@@ -138,9 +139,12 @@ def handle_postback(event):
             event.reply_token,
             TextSendMessage(text=text)
         )
-    elif postback_data == "yes":
+    elif postback_data == "yes" and not button_disabled:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="全員間に合いました！！"))
         # ここにNoが選択されたときの処理を追加
+
+    if event.postback.data == "yes" or event.postback.data == "no":
+        button_disabled = True  # ボタンが押されたら無効にする
 
     
 
