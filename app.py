@@ -105,7 +105,8 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     if event.message.text.lower() == "確認":
-        global button_disabled=False
+        global button_disabled
+        button_disabled=False
         # 確認テンプレートの作成
         confirm_template = ConfirmTemplate(
             text="約束に間に合いましたか?",
