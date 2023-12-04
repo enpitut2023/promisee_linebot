@@ -23,19 +23,19 @@ line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
 # グループメンバーのプロフィール情報を取得する関数
-def get_group_members(group_id):
-    members = []
-    url = f'https://api.line.me/v2/bot/group/{group_id}/members/ids'
-    headers = {
-        'Authorization': f'Bearer {CHANNEL_ACCESS_TOKEN}'
-    }
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        members = response.json()['memberIds']
-    return members
+# def get_group_members(group_id):
+#     members = []
+#     url = f'https://api.line.me/v2/bot/group/{group_id}/members/ids'
+#     headers = {
+#         'Authorization': f'Bearer {CHANNEL_ACCESS_TOKEN}'
+#     }
+#     response = requests.get(url, headers=headers)
+#     if response.status_code == 200:
+#         members = response.json()['memberIds']
+#     return members
 
 
-
+# 基本いじらない
 @app.route("/callback", methods=['POST'])
 def callback():
     # ラインからのPOSTかを判定
@@ -54,33 +54,33 @@ def callback():
 
     return 'OK'
 
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-    if isinstance(event.source, SourceGroup):
-        group_id = event.source.group_id
-    # 受け取ったメッセージがテキストの場合、確認テンプレートを送信する
-    if event.message.text.lower() == "confirm":
-        # グループのメンバーIDを取得
-        group_members = get_group_members(group_id)
-        user_actions = []
-        for member_id in group_members:
-            profile = line_bot_api.get_profile(member_id)
+# @handler.add(MessageEvent, message=TextMessage)
+# def handle_message(event):
+#     if isinstance(event.source, SourceGroup):
+#         group_id = event.source.group_id
+#     # 受け取ったメッセージがテキストの場合、確認テンプレートを送信する
+#     if event.message.text.lower() == "confirm":
+#         # グループのメンバーIDを取得
+#         group_members = get_group_members(group_id)
+#         user_actions = []
+#         for member_id in group_members:
+#             profile = line_bot_api.get_profile(member_id)
             
-            display_name = profile.display_name
+#             display_name = profile.display_name
                 
-            # ラベルが表示名となるPostbackActionを作成
-            action = PostbackAction(label=display_name, data=display_name)
-            user_actions.append(action)
+#             # ラベルが表示名となるPostbackActionを作成
+#             action = PostbackAction(label=display_name, data=display_name)
+#             user_actions.append(action)
 
-        confirm_template = ConfirmTemplate(
-            text="約束に間に合わなかった人は?",
-            actions=user_actions + [PostbackAction(label="いない", data="no")]
-        )
-        template_message = TemplateSendMessage(
-            alt_text="this is a confirm template",
-            template=confirm_template
-        )
-        line_bot_api.reply_message(event.reply_token, template_message)
+#         confirm_template = ConfirmTemplate(
+#             text="約束に間に合わなかった人は?",
+#             actions=[user_actions,PostbackAction(label="いない", data="no")]
+#         )
+#         template_message = TemplateSendMessage(
+#             alt_text="this is a confirm template",
+#             template=confirm_template
+#         )
+#         line_bot_api.reply_message(event.reply_token, template_message)
 
 
         # # ユーザー名のリストを文字列に変換して送信
@@ -101,7 +101,24 @@ def handle_message(event):
     #         TextSendMessage(text=text)
     #     )
 
-    
+   # メッセージイベントのハンドラ
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event):
+    if event.message.text.lower() == "confirm":
+        # 確認テンプレートの作成
+        confirm_template = ConfirmTemplate(
+            text="約束に間に合いましたか?",
+            actions=[
+                PostbackAction(label="Yes", data="yes"),
+                PostbackAction(label="No", data="no")
+            ]
+        )
+        template_message = TemplateSendMessage(
+            alt_text="this is a confirm template",
+            template=confirm_template
+        )
+        # 確認テンプレートを返信
+        line_bot_api.reply_message(event.reply_token, template_message) 
 
 # ポストバックイベントのハンドラ
 @handler.add(PostbackEvent)
@@ -109,7 +126,7 @@ def handle_postback(event):
     postback_data = event.postback.data
 
     # ポストバックデータに応じた処理
-    if postback_data != "no":
+    if postback_data == "no":
         
         # ここにYesが選択されたときの処理を追加
         text1 = postback_data
@@ -122,10 +139,44 @@ def handle_postback(event):
             event.reply_token,
             TextSendMessage(text=text)
         )
-    elif postback_data == "no":
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="Noが選択されました"))
+    elif postback_data == "yes":
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(text="全員間に合いました！！"))
         # ここにNoが選択されたときの処理を追加
 
     
+
+# メッセージイベントのハンドラ
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event):
+    if event.message.text.lower() == "confirm":
+        # 確認テンプレートの作成
+        confirm_template = ConfirmTemplate(
+            text="約束に間に合いましたか?",
+            actions=[
+                PostbackAction(label="Yes", data="yes"),
+                PostbackAction(label="No", data="no")
+            ]
+        )
+        template_message = TemplateSendMessage(
+            alt_text="this is a confirm template",
+            template=confirm_template
+        )
+        # 確認テンプレートを返信
+        line_bot_api.reply_message(event.reply_token, template_message)
+
+# # ポストバックイベントのハンドラ
+# @handler.add(PostbackEvent)
+# def handle_postback(event):
+#     postback_data = event.postback.data
+
+#     # ポストバックデータに応じた処理
+#     if postback_data == "yes":
+#         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="Yesが選択されました"))
+#         # ここにYesが選択されたときの処理を追加
+#     elif postback_data == "no":
+#         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="Noが選択されました"))
+#         # ここにNoが選択されたときの処理を追加
+
+
 if __name__ == "__main__":
     app.run()
