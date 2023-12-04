@@ -104,7 +104,7 @@ def callback():
    # メッセージイベントのハンドラ
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    if event.message.text.lower() == "confirm":
+    if event.message.text.lower() == "確認":
         # 確認テンプレートの作成
         confirm_template = ConfirmTemplate(
             text="約束に間に合いましたか?",
@@ -129,11 +129,10 @@ def handle_postback(event):
     if postback_data == "no":
         
         # ここにYesが選択されたときの処理を追加
-        text1 = postback_data
         text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
             
         url="https://gift.line.me/item/6517019"
-        text = text1 + " " + text2 + "\n" + url
+        text = text2 + "\n" + url
 
         line_bot_api.reply_message(
             event.reply_token,
@@ -145,24 +144,7 @@ def handle_postback(event):
 
     
 
-# メッセージイベントのハンドラ
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-    if event.message.text.lower() == "confirm":
-        # 確認テンプレートの作成
-        confirm_template = ConfirmTemplate(
-            text="約束に間に合いましたか?",
-            actions=[
-                PostbackAction(label="Yes", data="yes"),
-                PostbackAction(label="No", data="no")
-            ]
-        )
-        template_message = TemplateSendMessage(
-            alt_text="this is a confirm template",
-            template=confirm_template
-        )
-        # 確認テンプレートを返信
-        line_bot_api.reply_message(event.reply_token, template_message)
+
 
 # # ポストバックイベントのハンドラ
 # @handler.add(PostbackEvent)
