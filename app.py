@@ -12,6 +12,7 @@ from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateS
 app = Flask(__name__)
 
 import os, dotenv, requests
+import random
 
 app = Flask(__name__)
 button_disabled=False
@@ -130,16 +131,32 @@ def handle_postback(event):
     # ポストバックデータに応じた処理
     if postback_data == "no" and not button_disabled:
         
-        # ここにYesが選択されたときの処理を追加
-        text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
-            
-        url="https://gift.line.me/item/6517019"
-        text = text2 + "\n" + url
 
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=text)
+        # 確認テンプレートの作成
+        confirm_template = ConfirmTemplate(
+            text="間に合った人にline詫びギフトを送りましょう(>_<)",
+            actions=[
+                PostbackAction(label="0-100", data="0-100"),
+                PostbackAction(label="100-400", data="100-400"),
+                PostbackAction(label="400-800", data="400-800")
+            ]
         )
+
+        template_message = TemplateSendMessage(
+            alt_text="this is a confirm template",
+            template=confirm_template
+        )
+        # 確認テンプレートを返信
+        line_bot_api.reply_message(event.reply_token, template_message) 
+
+        # gift_idx = random.randint(0, 2)
+        # url=["https://gift.line.me/item/7203592", "https://gift.line.me/item/6517019", "https://gift.line.me/item/6517019"]
+        # text = text2 + "\n" + url[gift_idx]
+
+        # line_bot_api.reply_message(
+        #     event.reply_token,
+        #     TextSendMessage(text=text)
+        # )
     elif postback_data == "yes" and not button_disabled:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="全員間に合いました！！"))
         # ここにNoが選択されたときの処理を追加
