@@ -107,7 +107,9 @@ def callback():
 def handle_message(event):
     if event.message.text.lower() == "確認":
         global button_disabled
+        global button_disabled1
         button_disabled=False
+        button_disabled1=False
         # 確認テンプレートの作成
         confirm_template = ConfirmTemplate(
             text="約束に間に合いましたか?",
@@ -126,7 +128,8 @@ def handle_message(event):
 # ポストバックイベントのハンドラ
 @handler.add(PostbackEvent)
 def handle_postback(event):
-    finish_words = ["yes", "no", "0-100", "100-400"]
+    finish_words = ["yes", "no"]
+    finish_words1 = [ "0-100", "100-400"]
 
     postback_data = event.postback.data
     global button_disabled
@@ -152,7 +155,7 @@ def handle_postback(event):
     elif postback_data == "yes" and not button_disabled:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="全員間に合いました！！"))
         # ここにNoが選択されたときの処理を追加
-    elif postback_data == "0-100" and not button_disabled:
+    elif postback_data == "0-100" and not button_disabled1:
 
         text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
         gift_idx = random.randint(0, 2)
@@ -163,7 +166,7 @@ def handle_postback(event):
             event.reply_token,
             TextSendMessage(text=text)
         )
-    elif postback_data == "100-400" and not button_disabled:
+    elif postback_data == "100-400" and not button_disabled1:
 
         text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
         gift_idx = random.randint(0, 2)
@@ -177,6 +180,8 @@ def handle_postback(event):
 
     if event.postback.data in finish_words:
         button_disabled = True  # ボタンが押されたら無効にする
+    if event.postback.data in finish_words:
+        button_disabled1 = True
 
     
 
