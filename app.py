@@ -155,7 +155,7 @@ def handle_postback(event):
     elif postback_data == "yes" and not button_disabled:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="全員間に合いました！！"))
         # ここにNoが選択されたときの処理を追加
-    elif postback_data == "0-100" and not button_disabled1:
+    elif postback_data == "0-100":
 
         text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
         gift_idx = random.randint(0, 2)
@@ -166,7 +166,7 @@ def handle_postback(event):
             event.reply_token,
             TextSendMessage(text=text)
         )
-    elif postback_data == "100-400" and not button_disabled1:
+    elif postback_data == "100-400":
 
         text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
         gift_idx = random.randint(0, 2)
