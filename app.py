@@ -137,8 +137,7 @@ def handle_postback(event):
             text="間に合った人にline詫びギフトを送りましょう(>_<)",
             actions=[
                 PostbackAction(label="0-100", data="0-100"),
-                PostbackAction(label="100-400", data="100-400"),
-                PostbackAction(label="400-800", data="400-800")
+                PostbackAction(label="100-400", data="100-400")
             ]
         )
 
