@@ -126,12 +126,13 @@ def handle_message(event):
 # ポストバックイベントのハンドラ
 @handler.add(PostbackEvent)
 def handle_postback(event):
+    finish_words = ["yes", "no", "0-100", "100-400"]
+
     postback_data = event.postback.data
     global button_disabled
     # ポストバックデータに応じた処理
     if postback_data == "no" and not button_disabled:
         
-
         # 確認テンプレートの作成
         confirm_template = ConfirmTemplate(
             text="間に合った人にline詫びギフトを送りましょう(>_<)",
@@ -148,19 +149,33 @@ def handle_postback(event):
         # 確認テンプレートを返信
         line_bot_api.reply_message(event.reply_token, template_message) 
 
-        # gift_idx = random.randint(0, 2)
-        # url=["https://gift.line.me/item/7203592", "https://gift.line.me/item/6517019", "https://gift.line.me/item/6517019"]
-        # text = text2 + "\n" + url[gift_idx]
-
-        # line_bot_api.reply_message(
-        #     event.reply_token,
-        #     TextSendMessage(text=text)
-        # )
     elif postback_data == "yes" and not button_disabled:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="全員間に合いました！！"))
         # ここにNoが選択されたときの処理を追加
+    elif postback_data == "0-100" and not button_disabled:
 
-    if event.postback.data == "yes" or event.postback.data == "no":
+        text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
+        gift_idx = random.randint(0, 2)
+        url=["https://gift.line.me/item/7203592", "https://gift.line.me/item/7513743", "https://gift.line.me/item/7513744"]
+        text = text2 + "\n" + url[gift_idx]
+
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=text)
+        )
+    elif postback_data == "100-400" and not button_disabled:
+
+        text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
+        gift_idx = random.randint(0, 2)
+        url=["https://gift.line.me/item/6875507", "https://gift.line.me/item/6517019", "https://gift.line.me/item/7051436"]
+        text = text2 + "\n" + url[gift_idx]
+
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=text)
+        )
+
+    if event.postback.data in finish_words:
         button_disabled = True  # ボタンが押されたら無効にする
 
     
