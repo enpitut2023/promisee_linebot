@@ -16,6 +16,7 @@ import random
 
 app = Flask(__name__)
 button_disabled=False
+button_disabled1=False
 dotenv.load_dotenv()
 CHANNEL_ACCESS_TOKEN = os.environ["CHANNEL_ACCESS_TOKEN"]
 CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
@@ -133,6 +134,7 @@ def handle_postback(event):
 
     postback_data = event.postback.data
     global button_disabled
+    global button_disabled1
     # ポストバックデータに応じた処理
     if postback_data == "no" and not button_disabled:
         
@@ -155,7 +157,7 @@ def handle_postback(event):
     elif postback_data == "yes" and not button_disabled:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="全員間に合いました！！"))
         # ここにNoが選択されたときの処理を追加
-    elif postback_data == "0-100":
+    elif postback_data == "0-100" and not button_disabled1:
 
         text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
         gift_idx = random.randint(0, 2)
@@ -166,7 +168,7 @@ def handle_postback(event):
             event.reply_token,
             TextSendMessage(text=text)
         )
-    elif postback_data == "100-400":
+    elif postback_data == "100-400" and not button_disabled1:
 
         text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
         gift_idx = random.randint(0, 2)
@@ -180,7 +182,7 @@ def handle_postback(event):
 
     if event.postback.data in finish_words:
         button_disabled = True  # ボタンが押されたら無効にする
-    if event.postback.data in finish_words:
+    if event.postback.data in finish_words1:
         button_disabled1 = True
 
     
