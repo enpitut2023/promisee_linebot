@@ -2,3 +2,7 @@ Flask
 line-bot-sdk
 python-dotenv 
 gunicorn
+firebase
+firebase_admin
+pyrebase4
+requests
