@@ -9,9 +9,32 @@ from linebot.exceptions import (
 
 from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup
 
-app = Flask(__name__)
 
 import os, dotenv, requests
+import pyrebase
+import firebase_admin
+from firebase_admin import credentials,firestore
+import requests
+
+# データベースの準備等
+cred = credentials.Certificate("key.json")
+
+firebase_admin.initialize_app(cred)
+db = firestore.client()
+
+doc_ref = db.collection('question')
+# データベース準備終了
+
+# データベース使い方
+# format={
+#     "username":None,
+#     "answer":None,
+# }
+# format['username']=user_name
+# format['answer']=response_type
+# doc = doc_ref.document() #ドキュメントを取得
+# doc.set(format) # データベースに追加
+
 
 app = Flask(__name__)
 button_disabled=False
