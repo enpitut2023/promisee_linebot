@@ -26,14 +26,13 @@ doc_ref = db.collection('question')
 # データベース準備終了
 
 # データベース使い方
-# format={
-#     "username":None,
-#     "answer":None,
-# }
-# format['username']=user_name
-# format['answer']=response_type
-# doc = doc_ref.document() #ドキュメントを取得
-# doc.set(format) # データベースに追加
+format={
+    "username":None,
+    "answer":None,
+}
+
+
+
 
 
 app = Flask(__name__)
@@ -77,52 +76,18 @@ def callback():
 
     return 'OK'
 
-# @handler.add(MessageEvent, message=TextMessage)
-# def handle_message(event):
-#     if isinstance(event.source, SourceGroup):
-#         group_id = event.source.group_id
-#     # 受け取ったメッセージがテキストの場合、確認テンプレートを送信する
-#     if event.message.text.lower() == "confirm":
-#         # グループのメンバーIDを取得
-#         group_members = get_group_members(group_id)
-#         user_actions = []
-#         for member_id in group_members:
-#             profile = line_bot_api.get_profile(member_id)
-            
-#             display_name = profile.display_name
-                
-#             # ラベルが表示名となるPostbackActionを作成
-#             action = PostbackAction(label=display_name, data=display_name)
-#             user_actions.append(action)
-
-#         confirm_template = ConfirmTemplate(
-#             text="約束に間に合わなかった人は?",
-#             actions=[user_actions,PostbackAction(label="いない", data="no")]
-#         )
-#         template_message = TemplateSendMessage(
-#             alt_text="this is a confirm template",
-#             template=confirm_template
-#         )
-#         line_bot_api.reply_message(event.reply_token, template_message)
-
-
-        # # ユーザー名のリストを文字列に変換して送信
-        # member_names = '\n'.join(profiles)
-        # reply_message = TextSendMessage(text=f'グループメンバー:\n{member_names}')
-        # line_bot_api.reply_message(event.reply_token, reply_message)
-
-
-    # テキストの最初の文字が@の場合、同じテキストを鸚鵡返し
-    # elif text.startswith('@'):
-    #     text1 = event.message.text 
-    #     text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
-            
-    #     url="https://gift.line.me/item/6517019"
-    #     text = text1 + " " +text2 + "\n" + url
-    #     line_bot_api.reply_message(
-    #         event.reply_token,
-    #         TextSendMessage(text=text)
-    #     )
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event):
+    if isinstance(event.source, SourceGroup):
+        group_id = event.source.groupId
+    # 受け取ったメッセージがテキストの場合、確認テンプレートを送信する
+    if event.message.text.lower() == "confirm":
+        # グループのメンバーIDを取得
+        format['username']='kouta'
+        format['answer']='yes'
+        doc = doc_ref.document(group_id) #ドキュメントを取得 
+        doc.set(format) 
+        
 
    # メッセージイベントのハンドラ
 @handler.add(MessageEvent, message=TextMessage)
