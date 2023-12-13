@@ -67,11 +67,10 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(events):
     print(events)
-    if isinstance(events.source):
-        group_id = events.source.groupId
-        print(group_id)
-        format["username"].append('kouta') # username
-        format["answer"].append('noo') # answer
+    group_id = events.source.groupId
+    print(group_id)
+    format["username"].append('kouta') # username
+    format["answer"].append('noo') # answer
 
     # 受け取ったメッセージがテキストの場合、確認テンプレートを送信する
     if events.message.text.lower() == "confirm":
