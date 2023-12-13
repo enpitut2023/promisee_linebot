@@ -65,15 +65,16 @@ def callback():
     return 'OK'
 
 @handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-    if isinstance(event.source, SourceGroup):
-        group_id = event.source.groupId
+def handle_message(events):
+    print(events)
+    if isinstance(events.source):
+        group_id = events.source.groupId
         print(group_id)
         format["username"].append('kouta') # username
         format["answer"].append('noo') # answer
 
     # 受け取ったメッセージがテキストの場合、確認テンプレートを送信する
-    if event.message.text.lower() == "confirm":
+    if events.message.text.lower() == "confirm":
         # グループのメンバーIDを取得
         doc = doc_ref.document(group_id) #ドキュメントを取得 
         doc.set(format) 
