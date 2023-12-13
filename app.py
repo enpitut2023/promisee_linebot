@@ -67,7 +67,7 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(events):
     print(events)
-    group_id = events.source.groupId
+    group_id = events.source.group_id
     print(group_id)
     format["username"].append('kouta') # username
     format["answer"].append('noo') # answer
