@@ -5,3 +5,4 @@ gunicorn
 firebase
 firebase_admin
 requests
+pyrebase
