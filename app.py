@@ -77,7 +77,7 @@ def handle_message(events):
     # 受け取ったメッセージがテキストの場合、確認テンプレートを送信する
     if events.message.text.lower() == "確認":
         group_id = events.source.group_id # groupidを取得
-        members_count = get_members_count(group_id)
+        members_count = line_bot_api.get_group_members_count(group_id)
 
         format['groupcount'] = members_count
 
