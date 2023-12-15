@@ -4,14 +4,13 @@ from linebot import (
     LineBotApi, WebhookHandler
 )
 from linebot.exceptions import (
-    InvalidSignatureError
+    InvalidSignatureError, LineBotApiError
 )
-
+import pyrebase
 from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup
 
 
 import os, dotenv, requests
-import pyrebase
 import firebase_admin
 from firebase_admin import credentials,firestore
 import requests
@@ -22,8 +21,12 @@ cred = credentials.Certificate("key.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-doc_ref = db.collection('groups')
+group_doc_ref = db.collection('groups')
+member_doc_ref = db.collection('group_member')
 # データベース準備終了
+
+# LIFF URL
+liff_url_base ="https://liff.line.me/2002096181-Ryql27BY"
 
 # データベース使い方
 format={
@@ -41,9 +44,6 @@ CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
  
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
-
-#
-
 
 # 基本いじらない
 @app.route("/callback", methods=['POST'])
@@ -67,17 +67,24 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(events):
     print(events)
-    group_id = events.source.group_id
-    print(group_id)
-    format["username"].append('kouta') # username
-    format["answer"].append('noo') # answer
+    
+
 
     # 受け取ったメッセージがテキストの場合、確認テンプレートを送信する
-    if events.message.text.lower() == "confirm":
-        # グループのメンバーIDを取得
-        doc = doc_ref.document(group_id) #ドキュメントを取得 
-        doc.set(format) 
-        
+    if events.message.text.lower() == "確認":
+        group_id = events.source.group_id # groupidを取得
+
+        group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
+        group_doc.set(format) #データベースに空データを格納
+        # LIFF URLを生成
+        # group_idをLIFF URLに埋め込む
+        liff_url = f"{liff_url_base}?group_id={group_id}"
+
+        # 生成したLIFF URLをユーザーに送信
+        line_bot_api.reply_message(
+            events.reply_token,
+            TextSendMessage(text=f"{liff_url}")
+        )
 
    # メッセージイベントのハンドラ
 # @handler.add(MessageEvent, message=TextMessage)
@@ -133,3 +140,9 @@ def handle_message(events):
 
 if __name__ == "__main__":
     app.run()
+
+
+
+
+
+
