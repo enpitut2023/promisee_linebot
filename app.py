@@ -81,6 +81,7 @@ def handle_message(events):
         group_id = events.source.group_id # groupidを取得
         group_count=line_bot_api.get_group_members_count(group_id)
         format['group_count']=group_count
+
         group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
         group_doc.set(format) #データベースに空データを格納
         # LIFF URLを生成
@@ -107,6 +108,7 @@ def handle_message(events):
             events.reply_token,
             TextSendMessage(text="予定が保存されました")
         )
+
 
     # 予定登録の処理
     elif events.message.text.lower().startswith(SCHEDULE_REGISTER_PREFIX):
