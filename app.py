@@ -6,7 +6,7 @@ from linebot import (
 from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError
 )
-
+import pyrebase
 from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup
 
 
@@ -32,7 +32,6 @@ liff_url_base ="https://liff.line.me/2002096181-Ryql27BY"
 format={
     "username":[],
     "answer":[],
-    "groupcount":None,
 }
 
 format_schedule={
@@ -77,9 +76,6 @@ def handle_message(events):
     # 受け取ったメッセージがテキストの場合、確認テンプレートを送信する
     if events.message.text.lower() == "確認":
         group_id = events.source.group_id # groupidを取得
-        members_count = get_members_count(group_id)
-
-        format['groupcount'] = member_count
 
         group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
         group_doc.set(format) #データベースに空データを格納
