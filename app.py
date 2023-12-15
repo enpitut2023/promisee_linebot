@@ -91,19 +91,19 @@ def handle_message(events):
             TextSendMessage(text=f"{liff_url}")
         )
 
-    if events.message.text.lower() == "予定":
-        group_id = events.source.group_id # groupidを取得
-        group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
-        group_doc.set(format_schedule) #データベースに空データを格納
-        # LIFF URLを生成
-        # group_idをLIFF URLに埋め込む
-        liff_url = f"{liff_url_base}?group_id={group_id}"
+    # if events.message.text.lower() == "予定":
+    #     group_id = events.source.group_id # groupidを取得
+    #     group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
+    #     group_doc.set(format_schedule) #データベースに空データを格納
+    #     # LIFF URLを生成
+    #     # group_idをLIFF URLに埋め込む
+    #     liff_url = f"{liff_url_base}?group_id={group_id}"
 
-        # 生成したLIFF URLをユーザーに送信
-        line_bot_api.reply_message(
-            events.reply_token,
-            TextSendMessage(text="予定が保存されました")
-        )
+    #     # 生成したLIFF URLをユーザーに送信
+    #     line_bot_api.reply_message(
+    #         events.reply_token,
+    #         TextSendMessage(text="予定が保存されました")
+    #     )
 
 
     # 予定登録の処理
@@ -111,7 +111,7 @@ def handle_message(events):
         schedule = events.message.text.lower()[len(SCHEDULE_REGISTER_PREFIX):].strip()
         group_id = events.source.group_id # groupidを取得
         group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
-        format_schedule.schedule = schedule
+        format_schedule['schedule'] = schedule
         group_doc.set(format_schedule) #データベースに空データを格納
 
         line_bot_api.reply_message(
