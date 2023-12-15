@@ -6,7 +6,7 @@ from linebot import (
 from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError
 )
-import pyrebase
+
 from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup
 
 
@@ -172,11 +172,6 @@ def handle_message(events):
 
 #     if event.postback.data == "yes" or event.postback.data == "no":
 #         button_disabled = True  # ボタンが押されたら無効にする
-
-    
-
-
-
 
 
 if __name__ == "__main__":
