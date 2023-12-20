@@ -250,7 +250,7 @@ def get_schedules_from_firestore():
     print(groups_ref)
     
     # 現在の日時より未来のスケジュールを取得する場合
-    now = datetime.datetime.now()
+    now = datetime.now()
     query = groups_ref.where('schedule', '>', now)
 
     # クエリを実行し、必要なデータを取得
