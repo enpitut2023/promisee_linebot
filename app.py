@@ -119,8 +119,8 @@ def handle_message(events):
         print("実行されました")
         # データベースから時間を取得
         schedule_data = group_doc.get().to_dict()
-        # schedule_time = schedule_data.get("schedule", "")  # スケジュールをデータベースから取ってくる
-        schedule_time= "2023年12月20日16時30分"
+        schedule_time = schedule_data.get("schedule", "")  # スケジュールをデータベースから取ってくる
+        # schedule_time= "2023年12月20日16時30分"
 
         if schedule_time:
             # 指定された時刻に実行される関数をスケジュール
