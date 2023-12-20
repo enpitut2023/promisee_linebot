@@ -14,6 +14,8 @@ import os, dotenv, requests
 import firebase_admin
 from firebase_admin import credentials,firestore
 import requests
+from datetime import datetime, timedelta
+import pytz
 
 # データベースの準備等
 cred = credentials.Certificate("key.json")
@@ -32,12 +34,13 @@ liff_url_base ="https://liff.line.me/2002096181-Ryql27BY"
 format={
     "username":[],
     "answer":[],
-    "groupcount":None,
+    "group_count":None,
+    "schedule": None,
 }
 
-format_schedule={
-    "schedule": "schedule"
-}
+# format_schedule={
+#     "schedule": "schedule"
+# }
 
 
 app = Flask(__name__)
@@ -48,6 +51,7 @@ CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
  
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
+
 
 # 基本いじらない
 @app.route("/callback", methods=['POST'])
@@ -77,7 +81,8 @@ def handle_message(events):
     # 受け取ったメッセージがテキストの場合、確認テンプレートを送信する
     if events.message.text.lower() == "確認":
         group_id = events.source.group_id # groupidを取得
-
+        group_count=line_bot_api.get_group_members_count(group_id)
+        format['group_count']=group_count
 
         group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
         group_doc.set(format) #データベースに空データを格納
@@ -91,13 +96,14 @@ def handle_message(events):
             TextSendMessage(text=f"{liff_url}")
         )
 
-    # if events.message.text.lower() == "予定":
-    #     group_id = events.source.group_id # groupidを取得
-    #     group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
-    #     group_doc.set(format_schedule) #データベースに空データを格納
-    #     # LIFF URLを生成
-    #     # group_idをLIFF URLに埋め込む
-    #     liff_url = f"{liff_url_base}?group_id={group_id}"
+    if events.message.text.lower() == "予定":
+        group_id = events.source.group_id # groupidを取得
+        format["schedule"]="1月2日"
+        group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
+        group_doc.set(format) #データベースに空データを格納
+        # LIFF URLを生成
+        # group_idをLIFF URLに埋め込む
+        liff_url = f"{liff_url_base}?group_id={group_id}"
 
     #     # 生成したLIFF URLをユーザーに送信
     #     line_bot_api.reply_message(
@@ -107,17 +113,17 @@ def handle_message(events):
 
 
     # 予定登録の処理
-    elif events.message.text.lower().startswith(SCHEDULE_REGISTER_PREFIX):
-        schedule = events.message.text.lower()[len(SCHEDULE_REGISTER_PREFIX):].strip()
-        group_id = events.source.group_id # groupidを取得
-        group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
-        format_schedule['schedule'] = schedule
-        group_doc.set(format_schedule) #データベースに空データを格納
+    # elif events.message.text.lower().startswith(SCHEDULE_REGISTER_PREFIX):
+    #     schedule = events.message.text.lower()[len(SCHEDULE_REGISTER_PREFIX):].strip()
+    #     group_id = events.source.group_id # groupidを取得
+    #     group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
+    #     format_schedule['schedule'] = schedule
+    #     group_doc.set(format_schedule) #データベースに空データを格納
 
-        line_bot_api.reply_message(
-            events.reply_token,
-            TextSendMessage(text="予定が保存されました")
-        )
+    #     line_bot_api.reply_message(
+    #         events.reply_token,
+    #         TextSendMessage(text="予定が保存されました")
+    #     )
     
 
     # # 予定確認の処理
@@ -176,12 +182,45 @@ def handle_message(events):
 #     if event.postback.data == "yes" or event.postback.data == "no":
 #         button_disabled = True  # ボタンが押されたら無効にする
 
+# def send_reminder():
+#     now = datetime.now(pytz.timezone('Asia/Tokyo')) # タイムゾーンに注意
+
+#     # Firestoreから予定データを取得する仮定の関数
+#     schedules = get_schedules_from_firestore()
+
+#     for schedule in schedules:
+#         # Firestoreから取得した日時をdatetimeオブジェクトに変換
+#         schedule_datetime = datetime.strptime(schedule['schedule'], "%Y-%m-%d %H:%M")
+#         schedule_datetime = schedule_datetime.replace(tzinfo=pytz.timezone('Asia/Tokyo'))
+
+#         # 現在時刻と予定時刻を比較
+#         if now >= schedule_datetime and now <= schedule_datetime + timedelta(minutes=5):
+#             # 予定の時刻になったら通知
+#             line_bot_api.push_message(schedule['group_id'], TextSendMessage(text=f"予定の時間です: {schedule['schedule']}"))
+
+# def get_schedules_from_firestore():
+#     db = firestore.client()
+#     groups_ref = db.collection('groups')
+    
+#     # 現在の日時より未来のスケジュールを取得する場合
+#     now = datetime.datetime.now()
+#     query = groups_ref.where('schedule', '>', now)
+
+#     # クエリを実行し、必要なデータを取得
+#     schedules = []
+#     try:
+#         docs = query.stream()
+#         for doc in docs:
+#             doc_data = doc.to_dict()
+#             if 'group_id' in doc_data and 'schedule' in doc_data:
+#                 schedules.append({
+#                     'group_id': doc_data['group_id'],
+#                     'schedule': doc_data['schedule']
+#                 })
+#     except Exception as e:
+#         print(f"Error getting documents: {e}")
+
+#     return schedules
 
 if __name__ == "__main__":
     app.run()
-
-
-
-
-
-
