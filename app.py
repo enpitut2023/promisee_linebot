@@ -112,9 +112,9 @@ def handle_message(events):
     #     )
         group_id = events.source.group_id # groupidを取得
         # 現在の年を取得
-        current_year = datetime.datetime.now().year
+        current_year = datetime.now().year
         # "1月1日"をdatetime型に変換（ここでは現在の年を使用）
-        schedule_date = datetime.datetime.strptime(f"{current_year}-01-01", "%Y-%m-%d")
+        schedule_date = datetime.strptime(f"{current_year}-01-01", "%Y-%m-%d")
         format["schedule"] = schedule_date
         group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
         group_doc.set(format) #データベースに空データを格納
