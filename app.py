@@ -11,16 +11,13 @@ from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateS
 from time import sleep
 
 import time
-
-
 import os, dotenv, requests
 import firebase_admin
 from firebase_admin import credentials,firestore
 import requests
-import atexit
-import schedule
-from apscheduler.schedulers.background import BackgroundScheduler
 import datetime
+
+cancel_flag = False
 # データベースの準備等
 cred = credentials.Certificate("key.json")
 
@@ -56,12 +53,7 @@ CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
-# 定期実行のためのスケジューラを作成
-scheduler = BackgroundScheduler()
-scheduler.start()
 
-# アプリケーション終了時にスケジューラを停止
-atexit.register(lambda: scheduler.shutdown())
 
 
 # 基本いじらない
@@ -127,30 +119,40 @@ def handle_message(events):
         print("実行されました")
         # データベースから時間を取得
         schedule_data = group_doc.get().to_dict()
-        schedule_time = schedule_data.get("schedule", "")  # スケジュールをデータベースから取ってくる（例：10:00　のような形式）
+        # schedule_time = schedule_data.get("schedule", "")  # スケジュールをデータベースから取ってくる
+        schedule_time= "2023年12月20日16時30分"
 
         if schedule_time:
-            # スケジューラに追加
-            schedule.every().day.at(schedule_time).do(send_reminder, group_id=group_id)
+            # 指定された時刻に実行される関数をスケジュール
+            target_datetime = datetime.datetime.strptime(schedule_time, "%Y年%m月%d日%H時%M分")
+            print(target_datetime)  
+            current_datetime = datetime.datetime.now()
+            # 現在時刻と指定時刻の差を求めている
+            time_difference = (target_datetime - current_datetime).total_seconds()
+            print(time_difference)
 
-            # スケジュールが定期的に実行されるように無限ループ
-            while True:
-                n = schedule.idle_seconds()
-                if n is None:
-                    break
-                elif n > 0:
-                    time.sleep(n)
-                schedule.run_pending()
+            # 指定時間までスリープ
+            while time_difference > 0:
+                if cancel_flag:
+                    print("実行がキャンセルされました")
+                    return
+                time.sleep(1)
+                current_datetime = datetime.datetime.now()
+                time_difference = (target_datetime - current_datetime).total_seconds()
+            
+            # time.sleep(max(0, time_difference))
+            # 指定時間に関数を実行
+            send_reminder(group_id)
 
                 
-# 定期実行する関数
+# 時間になったら実行する関数
 def send_reminder(group_id):
     # group_idをLIFF URLに埋め込む
     liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?group_id={group_id}"
     # LINEボットを通じてメッセージを送信する処理
     message = TextSendMessage(text=f"{liff_url}")
     line_bot_api.push_message(group_id, messages=message)
-    return schedule.CancelJob
+
 
 
 
