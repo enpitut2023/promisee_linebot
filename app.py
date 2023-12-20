@@ -16,6 +16,7 @@ from firebase_admin import credentials,firestore
 import requests
 from datetime import datetime, timedelta
 import pytz
+from apscheduler.schedulers.background import BackgroundScheduler
 
 # データベースの準備等
 cred = credentials.Certificate("key.json")
@@ -243,3 +244,6 @@ def get_schedules_from_firestore():
 
 if __name__ == "__main__":
     app.run()
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(send_reminder, 'interval', minutes=1)  # 例: 1分ごとにチェック
+    scheduler.start()
