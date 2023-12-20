@@ -244,12 +244,11 @@ def get_schedules_from_firestore():
 
     return schedules
 
+scheduler = BackgroundScheduler()
+scheduler.add_job(send_reminder, 'interval', minutes=1)  # 例: 1分ごとにチェック
+scheduler.start()
+
 if __name__ == "__main__":
     app.run()
-    print(1111111111)
-    scheduler = BackgroundScheduler()
-    print(2222222222)
-    scheduler.add_job(send_reminder, 'interval', minutes=1)  # 例: 1分ごとにチェック
-    print(3333333333)
-    scheduler.start()
+    
     
