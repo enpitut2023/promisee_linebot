@@ -8,13 +8,19 @@ from linebot.exceptions import (
 )
 
 from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup
+from time import sleep
+
+import time
 
 
 import os, dotenv, requests
 import firebase_admin
 from firebase_admin import credentials,firestore
 import requests
-
+import atexit
+import schedule
+from apscheduler.schedulers.background import BackgroundScheduler
+import datetime
 # データベースの準備等
 cred = credentials.Certificate("key.json")
 
@@ -36,9 +42,9 @@ format={
     "schedule": None,
 }
 
-# format_schedule={
-#     "schedule": "schedule"
-# }
+format_schedule={
+    "schedule": "schedule"
+}
 
 
 app = Flask(__name__)
@@ -49,6 +55,13 @@ CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
  
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
+
+# 定期実行のためのスケジューラを作成
+scheduler = BackgroundScheduler()
+scheduler.start()
+
+# アプリケーション終了時にスケジューラを停止
+atexit.register(lambda: scheduler.shutdown())
 
 
 # 基本いじらない
@@ -72,9 +85,7 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(events):
-    print(events)
-    SCHEDULE_REGISTER_PREFIX = "予定登録"
-    SCHEDULE_CHECK_PREFIX = "予定確認"
+
     
     # 受け取ったメッセージがテキストの場合、確認テンプレートを送信する
     if events.message.text.lower() == "確認":
@@ -94,35 +105,54 @@ def handle_message(events):
             TextSendMessage(text=f"{liff_url}")
         )
 
-    if events.message.text.lower() == "予定":
-        group_id = events.source.group_id # groupidを取得
-        format["schedule"]="1月1日"
-        group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
-        group_doc.set(format) #データベースに空データを格納
-        # LIFF URLを生成
-        # group_idをLIFF URLに埋め込む
-        liff_url = f"{liff_url_base}?group_id={group_id}"
+    # if events.message.text.lower() == "予定":
+    #     group_id = events.source.group_id # groupidを取得
+    #     format["schedule"]="1月1日"
+    #     group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
+    #     group_doc.set(format) #データベースに空データを格納
+    #     # LIFF URLを生成
+    #     # group_idをLIFF URLに埋め込む
+    #     liff_url = f"{liff_url_base}?group_id={group_id}"
 
-        # 生成したLIFF URLをユーザーに送信
-        line_bot_api.reply_message(
-            events.reply_token,
-            TextSendMessage(text="予定が保存されました")
-        )
+    #     # 生成したLIFF URLをユーザーに送信
+    #     line_bot_api.reply_message(
+    #         events.reply_token,
+    #         TextSendMessage(text="予定が保存されました")
+    #     )
+
+ # 予定の時間がデータベースに登録されている前提
+    elif events.message.text.lower() == "テスト":
+        group_id = events.source.group_id
+        group_doc = group_doc_ref.document(group_id) 
+        print("実行されました")
+        # データベースから時間を取得
+        schedule_data = group_doc.get().to_dict()
+        schedule_time = schedule_data.get("schedule", "")  # スケジュールをデータベースから取ってくる（例：10:00　のような形式）
+
+        if schedule_time:
+            # スケジューラに追加
+            schedule.every().day.at(schedule_time).do(send_reminder, group_id=group_id)
+
+            # スケジュールが定期的に実行されるように無限ループ
+            while True:
+                n = schedule.idle_seconds()
+                if n is None:
+                    break
+                elif n > 0:
+                    time.sleep(n)
+                schedule.run_pending()
+
+                
+# 定期実行する関数
+def send_reminder(group_id):
+    # group_idをLIFF URLに埋め込む
+    liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?group_id={group_id}"
+    # LINEボットを通じてメッセージを送信する処理
+    message = TextSendMessage(text=f"{liff_url}")
+    line_bot_api.push_message(group_id, messages=message)
+    return schedule.CancelJob
 
 
-    # 予定登録の処理
-    elif events.message.text.lower().startswith(SCHEDULE_REGISTER_PREFIX):
-        schedule = events.message.text.lower()[len(SCHEDULE_REGISTER_PREFIX):].strip()
-        group_id = events.source.group_id # groupidを取得
-        group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
-        format_schedule.schedule = schedule
-        group_doc.set(format_schedule) #データベースに空データを格納
-
-        line_bot_api.reply_message(
-            events.reply_token,
-            TextSendMessage(text="予定が保存されました")
-        )
-    
 
     # # 予定確認の処理
     # elif input_text.startswith(CHECK_PREFIX):
@@ -134,51 +164,6 @@ def handle_message(events):
     #     return "無効な入力です。"
 
 
-   # メッセージイベントのハンドラ
-# @handler.add(MessageEvent, message=TextMessage)
-# def handle_message(event):
-#     if event.message.text.lower() == "確認":
-#         global button_disabled
-#         button_disabled=False
-#         # 確認テンプレートの作成
-#         confirm_template = ConfirmTemplate(
-#             text="約束に間に合いましたか?",
-#             actions=[
-#                 PostbackAction(label="Yes", data="yes"),
-#                 PostbackAction(label="No", data="no")
-#             ]
-#         )
-#         template_message = TemplateSendMessage(
-#             alt_text="this is a confirm template",
-#             template=confirm_template
-#         )
-#         # 確認テンプレートを返信
-#         line_bot_api.reply_message(event.reply_token, template_message) 
-
-# # ポストバックイベントのハンドラ
-# @handler.add(PostbackEvent)
-# def handle_postback(event):
-#     postback_data = event.postback.data
-#     global button_disabled
-#     # ポストバックデータに応じた処理
-#     if postback_data == "no" and not button_disabled:
-        
-#         # ここにYesが選択されたときの処理を追加
-#         text2 = "間に合った人にline詫びギフトを送りましょう(>_<)"
-            
-#         url="https://gift.line.me/item/6517019"
-#         text = text2 + "\n" + url
-
-#         line_bot_api.reply_message(
-#             event.reply_token,
-#             TextSendMessage(text=text)
-#         )
-#     elif postback_data == "yes" and not button_disabled:
-#         line_bot_api.reply_message(event.reply_token, TextSendMessage(text="全員間に合いました！！"))
-#         # ここにNoが選択されたときの処理を追加
-
-#     if event.postback.data == "yes" or event.postback.data == "no":
-#         button_disabled = True  # ボタンが押されたら無効にする
 
 if __name__ == "__main__":
-    app.run()
+    app.run(port=5002)
