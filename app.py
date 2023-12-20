@@ -17,6 +17,7 @@ import requests
 from datetime import datetime, timedelta
 import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
+import re
 
 # データベースの準備等
 cred = credentials.Certificate("key.json")
@@ -130,6 +131,30 @@ def handle_message(events):
             TextSendMessage(text="予定が保存されました")
         )
 
+    if events.message.text.lower().startswith("予定"):
+        # 日時の形式（例：「予定 2023年12月25日 18:00」）に合わせて解析
+        pattern = r"予定 (\d{4})年(\d{1,2})月(\d{1,2})日 (\d{1,2}):(\d{2})"
+        match = re.search(pattern, events.message.text)
+        if match:
+            year, month, day, hour, minute = map(int, match.groups())
+            schedule_datetime = datetime(year, month, day, hour, minute)
+            # Firestoreに保存
+            group_id = events.source.group_id
+            group_doc = group_doc_ref.document(group_id)
+            group_doc.set({
+                "schedule": schedule_datetime.strftime("%Y-%m-%d %H:%M")
+            })
+            # ユーザーに確認メッセージを送信
+            line_bot_api.reply_message(
+                events.reply_token,
+                TextSendMessage(text="予定が保存されました")
+            )
+        else:
+            # 日時が正しく抽出できなかった場合の処理
+            line_bot_api.reply_message(
+                events.reply_token,
+                TextSendMessage(text="正しい日時形式で入力してください。例: '予定 2023年12月25日 18:00'")
+            )
 
     # 予定登録の処理
     # elif events.message.text.lower().startswith(SCHEDULE_REGISTER_PREFIX):
