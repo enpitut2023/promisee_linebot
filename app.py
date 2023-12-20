@@ -199,45 +199,47 @@ def handle_message(events):
 #     if event.postback.data == "yes" or event.postback.data == "no":
 #         button_disabled = True  # ボタンが押されたら無効にする
 
-# def send_reminder():
-#     now = datetime.now(pytz.timezone('Asia/Tokyo')) # タイムゾーンに注意
+def send_reminder():
+    now = datetime.now(pytz.timezone('Asia/Tokyo')) # タイムゾーンに注意
 
-#     # Firestoreから予定データを取得する仮定の関数
-#     schedules = get_schedules_from_firestore()
+    # Firestoreから予定データを取得する仮定の関数
+    schedules = get_schedules_from_firestore()
 
-#     for schedule in schedules:
-#         # Firestoreから取得した日時をdatetimeオブジェクトに変換
-#         schedule_datetime = datetime.strptime(schedule['schedule'], "%Y-%m-%d %H:%M")
-#         schedule_datetime = schedule_datetime.replace(tzinfo=pytz.timezone('Asia/Tokyo'))
+    for schedule in schedules:
+        # Firestoreから取得した日時をdatetimeオブジェクトに変換
+        schedule_datetime = datetime.strptime(schedule['schedule'], "%Y-%m-%d %H:%M")
+        schedule_datetime = schedule_datetime.replace(tzinfo=pytz.timezone('Asia/Tokyo'))
 
-#         # 現在時刻と予定時刻を比較
-#         if now >= schedule_datetime and now <= schedule_datetime + timedelta(minutes=5):
-#             # 予定の時刻になったら通知
-#             line_bot_api.push_message(schedule['group_id'], TextSendMessage(text=f"予定の時間です: {schedule['schedule']}"))
+        # 現在時刻と予定時刻を比較
+        if now >= schedule_datetime and now <= schedule_datetime + timedelta(minutes=5):
+            # 予定の時刻になったら通知
+            line_bot_api.push_message(schedule['group_id'], TextSendMessage(text=f"予定の時間です: {schedule['schedule']}"))
 
-# def get_schedules_from_firestore():
-#     db = firestore.client()
-#     groups_ref = db.collection('groups')
+def get_schedules_from_firestore():
+    db = firestore.client()
+    groups_ref = db.collection('groups')
+    print("groups_ref")
+    print(groups_ref)
     
-#     # 現在の日時より未来のスケジュールを取得する場合
-#     now = datetime.datetime.now()
-#     query = groups_ref.where('schedule', '>', now)
+    # 現在の日時より未来のスケジュールを取得する場合
+    now = datetime.datetime.now()
+    query = groups_ref.where('schedule', '>', now)
 
-#     # クエリを実行し、必要なデータを取得
-#     schedules = []
-#     try:
-#         docs = query.stream()
-#         for doc in docs:
-#             doc_data = doc.to_dict()
-#             if 'group_id' in doc_data and 'schedule' in doc_data:
-#                 schedules.append({
-#                     'group_id': doc_data['group_id'],
-#                     'schedule': doc_data['schedule']
-#                 })
-#     except Exception as e:
-#         print(f"Error getting documents: {e}")
+    # クエリを実行し、必要なデータを取得
+    schedules = []
+    try:
+        docs = query.stream()
+        for doc in docs:
+            doc_data = doc.to_dict()
+            if 'group_id' in doc_data and 'schedule' in doc_data:
+                schedules.append({
+                    'group_id': doc_data['group_id'],
+                    'schedule': doc_data['schedule']
+                })
+    except Exception as e:
+        print(f"Error getting documents: {e}")
 
-#     return schedules
+    return schedules
 
 if __name__ == "__main__":
     app.run()
