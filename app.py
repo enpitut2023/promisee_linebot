@@ -111,6 +111,7 @@ def handle_message(events):
     #         events.reply_token,
     #         TextSendMessage(text="予定が保存されました")
     #     )
+        print("予定予定予定")
         group_id = events.source.group_id # groupidを取得
         # 現在の年を取得
         current_year = datetime.now().year
@@ -201,6 +202,7 @@ def handle_message(events):
 #         button_disabled = True  # ボタンが押されたら無効にする
 
 def send_reminder():
+    print("send_reminder")
     now = datetime.now(pytz.timezone('Asia/Tokyo')) # タイムゾーンに注意
 
     # Firestoreから予定データを取得する仮定の関数
@@ -244,6 +246,10 @@ def get_schedules_from_firestore():
 
 if __name__ == "__main__":
     app.run()
+    print(1111111111)
     scheduler = BackgroundScheduler()
+    print(2222222222)
     scheduler.add_job(send_reminder, 'interval', minutes=1)  # 例: 1分ごとにチェック
+    print(3333333333)
     scheduler.start()
+    
