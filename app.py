@@ -7,7 +7,7 @@ from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError
 )
 
-from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup
+from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup, FlexSendMessage, BubbleContainer, TextComponent, BoxComponent, ButtonComponent, PostbackAction, DatetimePickerAction
 
 
 import os, dotenv, requests
@@ -98,40 +98,40 @@ def handle_message(events):
             TextSendMessage(text=f"{liff_url}")
         )
 
-    if events.message.text.lower() == "予定":
-        # group_id = events.source.group_id # groupidを取得
-        # format["schedule"]="1月2日"
-        # group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
-        # group_doc.set(format) #データベースに空データを格納
-        # # LIFF URLを生成
-        # # group_idをLIFF URLに埋め込む
-        # liff_url = f"{liff_url_base}?group_id={group_id}"
+    # if events.message.text.lower() == "予定":
+    #     # group_id = events.source.group_id # groupidを取得
+    #     # format["schedule"]="1月2日"
+    #     # group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
+    #     # group_doc.set(format) #データベースに空データを格納
+    #     # # LIFF URLを生成
+    #     # # group_idをLIFF URLに埋め込む
+    #     # liff_url = f"{liff_url_base}?group_id={group_id}"
+
+    # #     # 生成したLIFF URLをユーザーに送信
+    # #     line_bot_api.reply_message(
+    # #         events.reply_token,
+    # #         TextSendMessage(text="予定が保存されました")
+    # #     )
+    #     print("予定予定予定")
+    #     group_id = events.source.group_id # groupidを取得
+    #     # 現在の年を取得
+    #     current_year = datetime.now().year
+    #     # "1月1日"をdatetime型に変換（ここでは現在の年を使用）
+    #     schedule_date = datetime.strptime(f"{current_year}-01-01", "%Y-%m-%d")
+    #     format["schedule"] = schedule_date
+    #     group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
+    #     group_doc.set(format) #データベースに空データを格納
+    #     # LIFF URLを生成
+    #     # group_idをLIFF URLに埋め込む
+    #     liff_url = f"{liff_url_base}?group_id={group_id}"
 
     #     # 生成したLIFF URLをユーザーに送信
     #     line_bot_api.reply_message(
     #         events.reply_token,
     #         TextSendMessage(text="予定が保存されました")
     #     )
-        print("予定予定予定")
-        group_id = events.source.group_id # groupidを取得
-        # 現在の年を取得
-        current_year = datetime.now().year
-        # "1月1日"をdatetime型に変換（ここでは現在の年を使用）
-        schedule_date = datetime.strptime(f"{current_year}-01-01", "%Y-%m-%d")
-        format["schedule"] = schedule_date
-        group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
-        group_doc.set(format) #データベースに空データを格納
-        # LIFF URLを生成
-        # group_idをLIFF URLに埋め込む
-        liff_url = f"{liff_url_base}?group_id={group_id}"
 
-        # 生成したLIFF URLをユーザーに送信
-        line_bot_api.reply_message(
-            events.reply_token,
-            TextSendMessage(text="予定が保存されました")
-        )
-
-    if events.message.text.lower().startswith("予定"):
+    # if events.message.text.lower().startswith("予定"):
         # 日時の形式（例：「予定 2023年12月25日 18:00」）に合わせて解析
         pattern = r"予定 (\d{4})年(\d{1,2})月(\d{1,2})日 (\d{1,2}):(\d{2})"
         match = re.search(pattern, events.message.text)
@@ -155,6 +155,37 @@ def handle_message(events):
                 events.reply_token,
                 TextSendMessage(text="正しい日時形式で入力してください。例: '予定 2023年12月25日 18:00'")
             )
+
+    if events.message.text.lower() == "予定":
+        group_id = events.source.group_id # groupidを取得
+
+        flex_message = FlexSendMessage(
+            alt_text='日時を選択してください',
+            contents=BubbleContainer(
+                body=BoxComponent(
+                    layout='vertical',
+                    contents=[
+                        TextComponent(text='日時を選択してください', weight='bold'),
+                        ButtonComponent(
+                            action=DatetimePickerAction(
+                                label='日時選択',
+                                data='datetime_postback',  # Postbackデータ
+                                mode='datetime',
+                                initial=datetime.datetime.now().strftime('%Y-%m-%dT%H:%M'),
+                                max='2100-12-31T23:59',
+                                min='1900-01-01T00:00'
+                            )
+                        )
+                    ]
+                )
+            )
+        )
+        # Flex Messageと追加のテキストメッセージを送信
+        line_bot_api.reply_message(
+            events.reply_token,
+            flex_message
+        )
+
 
     # 予定登録の処理
     # elif events.message.text.lower().startswith(SCHEDULE_REGISTER_PREFIX):
@@ -225,6 +256,19 @@ def handle_message(events):
 
 #     if event.postback.data == "yes" or event.postback.data == "no":
 #         button_disabled = True  # ボタンが押されたら無効にする
+@handler.add(PostbackEvent)
+def handle_postback(event):
+    if event.postback.data == 'datetime_postback':
+        # 日時選択のPostbackデータを受け取った場合
+        selected_datetime = event.postback.params['datetime']  # ユーザーが選択した日時
+
+        # 選択された日時に関する処理（必要に応じて）
+
+        # ユーザーに対して応答メッセージを送信
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text="送信が完了しました")
+        )
 
 def send_reminder():
     print("send_reminder")
