@@ -1,5 +1,4 @@
 Flask[async]
-python==3.8
 line-bot-sdk
 python-dotenv 
 gunicorn
