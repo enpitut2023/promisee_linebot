@@ -1,4 +1,4 @@
-Flask
+Flask[async]
 line-bot-sdk
 python-dotenv 
 gunicorn
