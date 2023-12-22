@@ -18,7 +18,6 @@ import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import datetime
-import uuid
 
 app = Flask(__name__)
 # スケジューラの設定

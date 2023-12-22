@@ -5,4 +5,5 @@ gunicorn
 firebase
 firebase_admin
 requests
-apscheduler
+APScheduler==3.6.3
+gevent
