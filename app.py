@@ -18,6 +18,7 @@ import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import datetime
+import pytz
 
 app = Flask(__name__)
 # スケジューラの設定
@@ -92,6 +93,9 @@ def handle_message(events):
         print("実行されました")
         schedule_data = group_doc.get().to_dict()["schedule"]
         schedule_time = datetime.strptime(schedule_data, "%Y年%m月%d日%H時%M分")
+        # タイムゾーンを日本時間に指定
+        jp_timezone = pytz.timezone('Asia/Tokyo')
+        schedule_time = jp_timezone.localize(schedule_time)
         # スケジューラーにタスクを追加
         scheduler.add_job(my_job, 'date', run_date=schedule_time,args=[group_id])
         return 'OK'
