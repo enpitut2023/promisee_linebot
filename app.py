@@ -19,6 +19,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import datetime
 import pytz
+from tasks import process_scheduled_task
 
 app = Flask(__name__)
 # スケジューラの設定
@@ -55,12 +56,6 @@ db = firestore.client()
 group_doc_ref = db.collection('groups')
 
 
-# 時間になったら実行する処理
-def my_job(arg1):
-    liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?group_id={arg1}"
-    message = TextSendMessage(text=f"{liff_url}")
-    line_bot_api.push_message(arg1, messages=message)
-    print("定期的な処理が実行されました", datetime.now())
 
 
 
@@ -97,7 +92,7 @@ def handle_message(events):
         jp_timezone = pytz.timezone('Asia/Tokyo')
         schedule_time_pytz = jp_timezone.localize(schedule_time)
         # スケジューラーにタスクを追加
-        scheduler.add_job(my_job, 'date', run_date=schedule_time_pytz,args=[group_id])
+        process_scheduled_task.apply_async(args=[group_id], eta=schedule_time_pytz)
         return 'OK'
     else:
         return 'OK'
