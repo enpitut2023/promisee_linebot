@@ -1,5 +1,5 @@
 import os
-from celery import Celery
+from celery import Celery, shared_task
 from celery.utils.log import get_task_logger
 from flask import Flask, request, abort, render_template
 
