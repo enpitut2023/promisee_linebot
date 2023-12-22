@@ -6,4 +6,4 @@ firebase
 firebase_admin
 requests
 APScheduler==3.6.3
-gevent
+pytz
