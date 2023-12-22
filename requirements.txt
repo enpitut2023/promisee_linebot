@@ -7,4 +7,5 @@ firebase_admin
 requests
 APScheduler==3.10.4
 pytz
-celery
+celery==5.2.6
+kombu
