@@ -89,9 +89,12 @@ def handle_message(events):
 
     elif events.message.text.lower() == "テスト":
         group_id = events.source.group_id
+        group_doc = group_doc_ref.document(group_id) 
         print("実行されました")
+        schedule_data = group_doc.get().to_dict()["schedule"]
+        schedule_time = datetime.strptime(schedule_data, "%Y年%m月%d日%H時%M分")
         # スケジューラーにタスクを追加
-        scheduler.add_job(my_job, 'date', run_date='2023-12-22 11:53:00',args=[group_id])
+        scheduler.add_job(my_job, 'date', run_date=schedule_time,args=[group_id])
         return 'OK'
     else:
         return 'OK'
