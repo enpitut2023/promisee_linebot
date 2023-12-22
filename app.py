@@ -60,7 +60,7 @@ def my_job(arg1):
     liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?group_id={arg1}"
     message = TextSendMessage(text=f"{liff_url}")
     line_bot_api.push_message(arg1, messages=message)
-    print("定期的な処理が実行されましたnanoda", datetime.now())
+    print("定期的な処理が実行されました", datetime.now())
 
 
 
@@ -95,7 +95,7 @@ def handle_message(events):
         schedule_time = datetime.strptime(schedule_data, "%Y年%m月%d日%H時%M分")
         # タイムゾーンを日本時間に指定
         jp_timezone = pytz.timezone('Asia/Tokyo')
-        schedule_time_pytz = jp_timezone.localize(schedule_time,is_dst=None)
+        schedule_time_pytz = jp_timezone.localize(schedule_time)
         # スケジューラーにタスクを追加
         scheduler.add_job(my_job, 'date', run_date=schedule_time_pytz,args=[group_id])
         return 'OK'
