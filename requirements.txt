@@ -8,4 +8,4 @@ requests
 APScheduler==3.10.4
 pytz
 celery
-kombu==5.2.4
+kombu
