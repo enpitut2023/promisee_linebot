@@ -19,15 +19,12 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import datetime
 import pytz
-from tasks import process_scheduled_task
+import threading
+import uuid
 
 app = Flask(__name__)
-# スケジューラの設定
-scheduler = BackgroundScheduler()
-
-# Flaskアプリケーションを初期化した後にスケジューラをスタートする
-scheduler.start()
-
+# タイムゾーンを日本時間に設定
+jp_timezone = pytz.timezone('Asia/Tokyo')
 dotenv.load_dotenv()
 CHANNEL_ACCESS_TOKEN = os.environ["CHANNEL_ACCESS_TOKEN"]
 CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
@@ -35,7 +32,7 @@ CHANNEL_SECRET = os.environ["CHANNEL_SECRET"]
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
-cancel_flag = False
+timers = {}
 liff_url_base = "https://liff.line.me/2002096181-Ryql27BY"
 
 # データベース使い方
@@ -54,7 +51,7 @@ cred = credentials.Certificate("key.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 group_doc_ref = db.collection('groups')
-
+schedules_doc_ref = db.collection('schedules')
 
 
 
@@ -82,22 +79,65 @@ def handle_message(events):
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"間に合ったかアンケートに回答するのだ\n{liff_url}"))
 
 
+
     elif events.message.text.lower() == "テスト":
-        group_id = events.source.group_id
-        group_doc = group_doc_ref.document(group_id) 
-        print("実行されました")
-        schedule_data = group_doc.get().to_dict()["schedule"]
-        schedule_time = datetime.strptime(schedule_data, "%Y年%m月%d日%H時%M分")
-        # タイムゾーンを日本時間に指定
-        jp_timezone = pytz.timezone('Asia/Tokyo')
-        schedule_time_pytz = jp_timezone.localize(schedule_time)
-        # スケジューラーにタスクを追加
-        process_scheduled_task.apply_async(args=[group_id], eta=schedule_time_pytz)
+        
+        # group_id = events.source.group_id
+        # group_doc = group_doc_ref.document(group_id) 
+        # schedule_data = group_doc.get().to_dict()["schedule"]
+        # schedule_time = datetime.strptime(schedule_data, "%Y年%m月%d日%H時%M分")
+        # schedule_time_pytz = jp_timezone.localize(schedule_time)
+        daily_schedule()
         return 'OK'
     else:
         return 'OK'
 
+
+# 定期実行する処理
+# 時間になったら実行する処理
+def scheduled_task(group_id,timer_id):
+    liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?group_id={group_id}"
+    message = TextSendMessage(text=f"{liff_url}")
+    line_bot_api.push_message(group_id, messages=message)
+    print("定期的な処理が実行されました")
+    cancel_timer(timer_id)
+
+# 毎日0時に実行される処理
+def daily_schedule():
+    print("daily_scheduleが実行されました")
+    today_schedules = daily_get_list()
+    for schedule in today_schedules:
+        time=schedule.to_dict()["datetime"]
+        time=jp_timezone.localize(datetime.strptime(time, "%Y年%m月%d日%H時%M分"))
+        current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
+        delay = max(0, (time - current_time).total_seconds())
+        timer_id = str(uuid.uuid4()) 
+        # タイマーを設定してイベントをスケジュール
+        timer = threading.Timer(delay, scheduled_task, args=(schedule.to_dict()["group_id"], timer_id))
+        timer.start()
+        timers[timer_id] = timer 
+
+def daily_get_list():
+    # レコードから今日の日付と同じ日時のものを選択
+    today_schedules = []
+    
+    today = datetime.now(jp_timezone).replace(hour=0, minute=0, second=0, microsecond=0)
+    for doc in schedules_doc_ref.stream():
+        schedule_data = doc.to_dict()
+        if "datetime" in schedule_data:
+            schedule_datetime = jp_timezone.localize(datetime.strptime(schedule_data["datetime"], "%Y年%m月%d日%H時%M分"))
+            if schedule_datetime.date() == today.date():
+                today_schedules.append(doc)
+    return today_schedules
+
+def cancel_timer(timer_id):
+    if timer_id in timers:
+        # タイマーが存在すればキャンセル
+        timer = timers[timer_id]
+        timer.cancel()
+        del timers[timer_id]
+
+# daily_schedule関数を毎日0時に呼び出す
+# schedule_daily_job(daily_schedule)
 if __name__ == "__main__":
-    if not scheduler.running:
-        scheduler.start()
     app.run(debug=False,port=5002)
