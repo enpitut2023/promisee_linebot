@@ -88,7 +88,6 @@ def handle_message(events):
         # schedule_time = datetime.strptime(schedule_data, "%Y年%m月%d日%H時%M分")
         # schedule_time_pytz = jp_timezone.localize(schedule_time)
         daily_schedule()
-
         return 'OK'
     else:
         return 'OK'
