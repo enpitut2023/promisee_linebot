@@ -141,10 +141,10 @@ system_timezone = datetime.now().astimezone().tzinfo
 # タイムゾーンが異なる場合、システムのタイムゾーンを指定
 if system_timezone != pytz.timezone('Asia/Tokyo'):
     print("System timezone is not Asia/Tokyo. Adjusting to system timezone.")
-    schedule.every().day.at("00:40").do(lambda: datetime.now(system_timezone).astimezone(pytz.timezone('Asia/Tokyo')).time())
+    schedule.every().day.at("15:50").do(lambda: datetime.now(system_timezone).astimezone(pytz.timezone('Asia/Tokyo')).time())
 else:
     # タイムゾーンが一致する場合、通常通りにスケジュールを設定
-    schedule.every().day.at("00:40").do(daily_schedule)
+    schedule.every().day.at("15:50").do(daily_schedule)
 
 # スケジュールに基づいてジョブを実行する関数
 def run_schedule():
