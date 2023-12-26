@@ -89,13 +89,7 @@ def handle_message(events):
         daily_schedule()
         return 'OK'
     else:
-        print("テスト")
-    
-        group_id = events.source.group_id
-        schedule_time=f"2023年" + events.message.text
-        schedules_doc = schedules_doc_ref.document()
-        schedules_doc.set({"datetime": schedule_time, "group_id": group_id})
-        line_bot_api.reply_message(events.reply_token, TextSendMessage(text="予定が登録されたのだ"))
+        return 'OK'
 
 # 定期実行する処理
 # 時間になったら実行する処理
