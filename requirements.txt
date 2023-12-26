@@ -5,7 +5,4 @@ gunicorn
 firebase
 firebase_admin
 requests
-APScheduler==3.10.4
 pytz
-celery==5.2.6
-kombu
