@@ -100,6 +100,8 @@ def handle_message(events):
         daily_schedule()
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text="予定が登録されたのだ"))
         
+    else:
+        return 'OK'
 
 # 定期実行する処理
 # 時間になったら実行する処理
@@ -147,9 +149,9 @@ def cancel_timer(timer_id):
 
 
 
-
 # タイムゾーンが一致する場合、通常通りにスケジュールを設定
 schedule.every().day.at("00:00").do(daily_schedule)
+
 
 # スケジュールに基づいてジョブを実行する関数
 def run_schedule():
