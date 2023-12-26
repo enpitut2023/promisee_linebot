@@ -15,8 +15,6 @@ import os, dotenv, requests
 import firebase_admin
 from firebase_admin import credentials,firestore
 import requests
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import datetime
 import pytz
 import threading
