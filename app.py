@@ -11,15 +11,18 @@ from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateS
 from time import sleep
 
 import time
-import os, dotenv, requests
+import os
+import dotenv
+import requests
 import firebase_admin
-from firebase_admin import credentials,firestore
+from firebase_admin import credentials, firestore
 import requests
 from datetime import datetime
 import pytz
 import threading
 import uuid
 import schedule
+import re
 
 app = Flask(__name__)
 # タイムゾーンを日本時間に設定
@@ -88,14 +91,15 @@ def handle_message(events):
         # schedule_time_pytz = jp_timezone.localize(schedule_time)
         daily_schedule()
         return 'OK'
-    else:
+    elif re.match(r"([1-9]|1[0-2])月([1-9]|[12][0-9]|3[01])日([01][0-9]|2[0-3])時([0-5][0-9])分", events.message.text):
         print("テスト")
-    
         group_id = events.source.group_id
-        schedule_time=f"2023年" + events.message.text
+        schedule_time="2023年" + events.message.text
         schedules_doc = schedules_doc_ref.document()
         schedules_doc.set({"datetime": schedule_time, "group_id": group_id})
+        daily_schedule()
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text="予定が登録されたのだ"))
+        
 
 # 定期実行する処理
 # 時間になったら実行する処理
@@ -141,16 +145,11 @@ def cancel_timer(timer_id):
         timer.cancel()
 
 
-# システムのタイムゾーンを取得
-system_timezone = datetime.now().astimezone().tzinfo
 
-# タイムゾーンが異なる場合、システムのタイムゾーンを指定
-if system_timezone != pytz.timezone('Asia/Tokyo'):
-    print("System timezone is not Asia/Tokyo. Adjusting to system timezone.")
-    schedule.every().day.at("00:40").do(lambda: datetime.now(system_timezone).astimezone(pytz.timezone('Asia/Tokyo')).time())
-else:
-    # タイムゾーンが一致する場合、通常通りにスケジュールを設定
-    schedule.every().day.at("00:40").do(daily_schedule)
+
+
+# タイムゾーンが一致する場合、通常通りにスケジュールを設定
+schedule.every().day.at("00:00").do(daily_schedule)
 
 # スケジュールに基づいてジョブを実行する関数
 def run_schedule():
@@ -170,3 +169,6 @@ if __name__ == "__main__":
     # Flaskアプリケーションを実行するスレッド
     flask_app_thread = threading.Thread(target=start_flask_app)
     flask_app_thread.start()
+   # 各スレッドの終了を待つ
+    schedule_thread.join()
+    flask_app_thread.join()
