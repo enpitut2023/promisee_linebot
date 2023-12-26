@@ -91,14 +91,14 @@ def handle_message(events):
         # schedule_time_pytz = jp_timezone.localize(schedule_time)
         daily_schedule()
         return 'OK'
-    elif re.match(r"([1-9]|1[0-2])月([1-9]|[12][0-9]|3[01])日([01][0-9]|2[0-3])時([0-5][0-9])分", events.message.text):
+    elif re.match(r"([1-9]|1[0-2])月([1-9]|[12][0-9]|3[01])日([01]?[0-9]|2[0-3])時([0-5][0-9])分", events.message.text):
         print("テスト")
         group_id = events.source.group_id
         schedule_time="2023年" + events.message.text
         schedules_doc = schedules_doc_ref.document()
-        schedules_doc.set({"datetime": schedule_time, "group_id": group_id})
-        daily_schedule()
+        schedules_doc.set({"datetime": schedule_time, "group_id": group_id})   
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text="予定が登録されたのだ"))
+        daily_schedule()
         
     else:
         return 'OK'
