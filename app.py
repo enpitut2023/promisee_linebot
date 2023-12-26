@@ -97,10 +97,11 @@ def handle_message(events):
         schedule_time="2023年" + events.message.text
         schedules_doc = schedules_doc_ref.document()
         schedules_doc.set({"datetime": schedule_time, "group_id": group_id})   
-        line_bot_api.reply_message(events.reply_token, TextSendMessage(text="予定が登録されたのだ"))
+        line_bot_api.reply_message(events.reply_token, TextSendMessage(text="予定が登録されたのだ！"))
         daily_schedule()
         
     else:
+        line_bot_api.reply_message(events.reply_token, TextSendMessage(text="このメッセージは無効なのだ〜"))
         return 'OK'
 
 # 定期実行する処理
