@@ -137,7 +137,7 @@ def cancel_timer(timer_id):
         del timers[timer_id]
 
 # daily_schedule関数を毎日0時に呼び出す
-schedule.every().day.at("23:15").do(daily_schedule)
+schedule.every().day.at("00:00").do(daily_schedule)
 
 # スケジュールに基づいてジョブを実行する関数
 def run_schedule():
