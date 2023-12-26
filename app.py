@@ -89,8 +89,13 @@ def handle_message(events):
         daily_schedule()
         return 'OK'
     else:
-        return 'OK'
-
+        print("テスト")
+    
+        group_id = events.source.group_id
+        schedule_time=f"2023年" + events.message.text
+        schedules_doc = schedules_doc_ref.document()
+        schedules_doc.set({"datetime": schedule_time, "group_id": group_id})
+        line_bot_api.reply_message(events.reply_token, TextSendMessage(text="予定が登録されたのだ"))
 
 # 定期実行する処理
 # 時間になったら実行する処理
@@ -134,10 +139,18 @@ def cancel_timer(timer_id):
         # タイマーが存在すればキャンセル
         timer = timers[timer_id]
         timer.cancel()
-        del timers[timer_id]
 
-# daily_schedule関数を毎日0時に呼び出す
-schedule.every().day.at("00:00").do(daily_schedule)
+
+# システムのタイムゾーンを取得
+system_timezone = datetime.now().astimezone().tzinfo
+
+# タイムゾーンが異なる場合、システムのタイムゾーンを指定
+if system_timezone != pytz.timezone('Asia/Tokyo'):
+    print("System timezone is not Asia/Tokyo. Adjusting to system timezone.")
+    schedule.every().day.at("00:40").do(lambda: datetime.now(system_timezone).astimezone(pytz.timezone('Asia/Tokyo')).time())
+else:
+    # タイムゾーンが一致する場合、通常通りにスケジュールを設定
+    schedule.every().day.at("00:40").do(daily_schedule)
 
 # スケジュールに基づいてジョブを実行する関数
 def run_schedule():
