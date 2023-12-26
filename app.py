@@ -17,7 +17,7 @@ import requests
 import firebase_admin
 from firebase_admin import credentials, firestore
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 import threading
 import uuid
@@ -78,7 +78,7 @@ def handle_message(events):
         group_doc = group_doc_ref.document(group_id)
         group_doc.set(format)
         liff_url = f"{liff_url_base}?group_id={group_id}"
-        line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"間に合ったかアンケートに回答するのだ\n{liff_url}"))
+        line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}"))
 
 
 
@@ -98,7 +98,6 @@ def handle_message(events):
         schedules_doc = schedules_doc_ref.document()
         schedules_doc.set({"datetime": schedule_time, "group_id": group_id})   
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text="予定が登録されたのだ！"))
-        daily_schedule()
         
     else:
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text="このメッセージは無効なのだ〜"))
@@ -116,7 +115,7 @@ def scheduled_task(group_id,timer_id):
 # 毎日0時に実行される処理
 def daily_schedule():
     print("daily_scheduleが実行されました")
-    today_schedules = daily_get_list()
+    today_schedules = minutes_get_list()
     for schedule in today_schedules:
         time=schedule.to_dict()["datetime"]
         time=jp_timezone.localize(datetime.strptime(time, "%Y年%m月%d日%H時%M分"))
@@ -127,6 +126,7 @@ def daily_schedule():
         timer = threading.Timer(delay, scheduled_task, args=(schedule.to_dict()["group_id"], timer_id))
         timer.start()
         timers[timer_id] = timer 
+
 
 def daily_get_list():
     # レコードから今日の日付と同じ日時のものを選択
@@ -141,6 +141,25 @@ def daily_get_list():
                 today_schedules.append(doc)
     return today_schedules
 
+
+# レビュー用
+def minutes_get_list():
+    minutes_schedules = []
+    current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
+    print(current_time)
+    new_time = current_time + timedelta(minutes=1)
+    # 秒を切り捨てる
+    new_time = new_time.replace(second=0, microsecond=0)
+    print(new_time)
+    for doc in schedules_doc_ref.stream():
+        schedule_data = doc.to_dict()
+        if "datetime" in schedule_data:
+            schedule_datetime = jp_timezone.localize(datetime.strptime(schedule_data["datetime"], "%Y年%m月%d日%H時%M分"))
+            print(schedule_datetime)
+            if schedule_datetime == new_time:
+                minutes_schedules.append(doc)
+    return minutes_schedules
+
 def cancel_timer(timer_id):
     if timer_id in timers:
         # タイマーが存在すればキャンセル
@@ -151,11 +170,12 @@ def cancel_timer(timer_id):
 
 
 # タイムゾーンが一致する場合、通常通りにスケジュールを設定
-schedule.every().day.at("00:00").do(daily_schedule)
+# schedule.every().day.at("00:00").do(daily_schedule)
 
 
 # スケジュールに基づいてジョブを実行する関数
 def run_schedule():
+    schedule.every(1).minutes.do(daily_schedule)
     while True:
         schedule.run_pending()
         time.sleep(1)
