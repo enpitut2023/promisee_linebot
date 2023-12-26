@@ -21,6 +21,7 @@ from datetime import datetime
 import pytz
 import threading
 import uuid
+import schedule
 
 app = Flask(__name__)
 # タイムゾーンを日本時間に設定
@@ -138,6 +139,23 @@ def cancel_timer(timer_id):
         del timers[timer_id]
 
 # daily_schedule関数を毎日0時に呼び出す
-# schedule_daily_job(daily_schedule)
+schedule.every().day.at("23:15").do(daily_schedule)
+
+# スケジュールに基づいてジョブを実行する関数
+def run_schedule():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+# Flaskアプリケーションを開始する関数
+def start_flask_app():
+    app.run(debug=False, port=5002)
+
 if __name__ == "__main__":
-    app.run(debug=False,port=5002)
+        # スケジュールを実行するスレッド
+    schedule_thread = threading.Thread(target=run_schedule)
+    schedule_thread.start()
+
+    # Flaskアプリケーションを実行するスレッド
+    flask_app_thread = threading.Thread(target=start_flask_app)
+    flask_app_thread.start()
