@@ -183,7 +183,7 @@ def run_schedule():
 def start_flask_app():
     app.run(debug=False, port=5002)
 
-if __name__ == "__main__" or __name__ == "app":
+if __name__ == "__main__":
         # スケジュールを実行するスレッド
     schedule_thread = threading.Thread(target=run_schedule)
     schedule_thread.start()
