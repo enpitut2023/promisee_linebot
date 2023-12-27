@@ -100,7 +100,7 @@ def handle_message(events):
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text="予定が登録されたのだ！"))
         
     else:
-        line_bot_api.reply_message(events.reply_token, TextSendMessage(text="このメッセージは無効なのだ〜"))
+        line_bot_api.reply_message(events.reply_token, TextSendMessage(text="このメッセージは無効なのだ〜「確認」と送ってほしいのだ！"))
         return 'OK'
 
 # 定期実行する処理
