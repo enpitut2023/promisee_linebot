@@ -183,7 +183,7 @@ def run_schedule():
 def start_flask_app():
     app.run(debug=False, port=5002)
 
-if __name__ == "__main__" or __name__ == "app":
+if __name__ == "__main__":
         # スケジュールを実行するスレッド
     schedule_thread = threading.Thread(target=run_schedule)
     schedule_thread.start()
@@ -194,3 +194,13 @@ if __name__ == "__main__" or __name__ == "app":
    # 各スレッドの終了を待つ
     schedule_thread.join()
     flask_app_thread.join()
+
+    # Gunicornが呼び出すためのモジュール名を追加
+if  __name__ == "app":
+
+    # スケジュールを実行するスレッド
+    schedule_thread = threading.Thread(target=run_schedule)
+    schedule_thread.start()
+
+    # Flaskアプリケーションを起動
+    app.run(debug=False, threaded=True)
