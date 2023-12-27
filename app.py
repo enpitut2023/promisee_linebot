@@ -174,6 +174,7 @@ def cancel_timer(timer_id):
 
 # スケジュールに基づいてジョブを実行する関数
 def run_schedule():
+    print("run_scheduleが実行されました")
     schedule.every(1).minutes.do(daily_schedule)
     while True:
         schedule.run_pending()
@@ -194,8 +195,6 @@ if __name__ == "__main__":
    # 各スレッドの終了を待つ
     schedule_thread.join()
     flask_app_thread.join()
-<<<<<<< HEAD
-=======
 
     # Gunicornが呼び出すためのモジュール名を追加
 if  __name__ == "app":
@@ -206,4 +205,4 @@ if  __name__ == "app":
 
     # Flaskアプリケーションを起動
     app.run(debug=False, threaded=True)
->>>>>>> 8280ddf (error)
+
