@@ -196,6 +196,7 @@ if __name__ == "__main__":
     schedule_thread.join()
     flask_app_thread.join()
 
+
     # Gunicornが呼び出すためのモジュール名を追加
 if  __name__ == "app":
 
