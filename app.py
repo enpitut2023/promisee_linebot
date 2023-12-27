@@ -204,6 +204,3 @@ if  __name__ == "app":
     schedule_thread = threading.Thread(target=run_schedule)
     schedule_thread.start()
 
-    # Flaskアプリケーションを起動
-    app.run(debug=False, threaded=True)
-
