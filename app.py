@@ -127,7 +127,6 @@ def daily_schedule():
         timer.start()
         timers[timer_id] = timer 
 
-
 def daily_get_list():
     # レコードから今日の日付と同じ日時のものを選択
     today_schedules = []
@@ -184,7 +183,7 @@ def run_schedule():
 def start_flask_app():
     app.run(debug=False, port=5002)
 
-if __name__ == "__main__":
+if __name__ == "__main__" or __name__ == "app":
         # スケジュールを実行するスレッド
     schedule_thread = threading.Thread(target=run_schedule)
     schedule_thread.start()
