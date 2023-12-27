@@ -174,6 +174,7 @@ def cancel_timer(timer_id):
 
 # スケジュールに基づいてジョブを実行する関数
 def run_schedule():
+    print("run_scheduleが実行されました")
     schedule.every(1).minutes.do(daily_schedule)
     while True:
         schedule.run_pending()
