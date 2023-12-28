@@ -137,12 +137,18 @@ def handle_message(events):
 def handle_postback(events):
     if events.postback.data == 'datetime_postback':
         # 日時選択のPostbackデータを受け取った場合
-        selected_datetime = events.postback.params['datetime']  # ユーザーが選択した日時
+        selected_iso_datetime = events.postback.params['datetime']  # ISO 8601 形式の日時文字列
+
+        # ISO 8601 形式の文字列を datetime オブジェクトに変換
+        selected_datetime = datetime.fromisoformat(selected_iso_datetime)
+
+        # 日時を指定された形式の文字列に変換
+        formatted_datetime = selected_datetime.strftime("%Y年%m月%d日%H時%M分")
 
         group_id = events.source.group_id
         # 選択された日時に関する処理（必要に応じて）
         schedules_doc = schedules_doc_ref.document()
-        schedules_doc.set({"datetime": selected_datetime, "group_id": group_id})
+        schedules_doc.set({"datetime": formatted_datetime, "group_id": group_id})
 
         # ユーザーに対して応答メッセージを送信
         line_bot_api.reply_message(
