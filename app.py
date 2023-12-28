@@ -85,15 +85,15 @@ def handle_message(events):
         group_id = events.source.group_id # groupidを取得
 
         flex_message = FlexSendMessage(
-            alt_text='日時を選択してください',
+            alt_text='予定日時を選択するのだ！',
             contents=BubbleContainer(
                 body=BoxComponent(
                     layout='vertical',
                     contents=[
-                        TextComponent(text='日時を選択してください', weight='bold'),
+                        TextComponent(text='予定日時を選択するのだ！', weight='bold'),
                         ButtonComponent(
                             action=DatetimePickerAction(
-                                label='日時選択',
+                                label='予定日時選択',
                                 data='datetime_postback',  # Postbackデータ
                                 mode='datetime',
                                 initial=datetime.now().strftime('%Y-%m-%dT%H:%M'),
@@ -153,7 +153,7 @@ def handle_postback(events):
         # ユーザーに対して応答メッセージを送信
         line_bot_api.reply_message(
             events.reply_token,
-            TextSendMessage(text="送信が完了しました")
+            TextSendMessage(text="予定が登録されたのだ！")
         )
 
 # 定期実行する処理
