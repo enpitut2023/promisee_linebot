@@ -171,7 +171,7 @@ def handle_message(events):
                                 label='日時選択',
                                 data='datetime_postback',  # Postbackデータ
                                 mode='datetime',
-                                initial=datetime.datetime.now().strftime('%Y-%m-%dT%H:%M'),
+                                initial=datetime.now().strftime('%Y-%m-%dT%H:%M'),
                                 max='2100-12-31T23:59',
                                 min='1900-01-01T00:00'
                             )
