@@ -7,7 +7,8 @@ from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError
 )
 
-from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup
+from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup, FlexSendMessage, BubbleContainer, TextComponent, BoxComponent, ButtonComponent, PostbackAction, DatetimePickerAction
+
 from time import sleep
 
 import time
@@ -80,7 +81,35 @@ def handle_message(events):
         liff_url = f"{liff_url_base}?group_id={group_id}"
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}"))
 
+    elif events.message.text.lower() == "予定":
+        group_id = events.source.group_id # groupidを取得
 
+        flex_message = FlexSendMessage(
+            alt_text='日時を選択してください',
+            contents=BubbleContainer(
+                body=BoxComponent(
+                    layout='vertical',
+                    contents=[
+                        TextComponent(text='日時を選択してください', weight='bold'),
+                        ButtonComponent(
+                            action=DatetimePickerAction(
+                                label='日時選択',
+                                data='datetime_postback',  # Postbackデータ
+                                mode='datetime',
+                                initial=datetime.now().strftime('%Y-%m-%dT%H:%M'),
+                                max='2100-12-31T23:59',
+                                min='1900-01-01T00:00'
+                            )
+                        )
+                    ]
+                )
+            )
+        )
+        # Flex Messageと追加のテキストメッセージを送信
+        line_bot_api.reply_message(
+            events.reply_token,
+            flex_message
+        )
 
     elif events.message.text.lower() == "テスト":
         
@@ -102,6 +131,24 @@ def handle_message(events):
     else:
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text="このメッセージは無効なのだ〜"))
         return 'OK'
+
+# 予定の保存処理
+@handler.add(PostbackEvent)
+def handle_postback(events):
+    if events.postback.data == 'datetime_postback':
+        # 日時選択のPostbackデータを受け取った場合
+        selected_datetime = events.postback.params['datetime']  # ユーザーが選択した日時
+
+        group_id = events.source.group_id
+        # 選択された日時に関する処理（必要に応じて）
+        schedules_doc = schedules_doc_ref.document()
+        schedules_doc.set({"datetime": selected_datetime, "group_id": group_id})
+
+        # ユーザーに対して応答メッセージを送信
+        line_bot_api.reply_message(
+            events.reply_token,
+            TextSendMessage(text="送信が完了しました")
+        )
 
 # 定期実行する処理
 # 時間になったら実行する処理
