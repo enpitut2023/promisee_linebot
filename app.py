@@ -56,8 +56,9 @@ db = firestore.client()
 group_doc_ref = db.collection('groups')
 schedules_doc_ref = db.collection('schedules')
 
-
-
+@app.route('/', methods=['GET'])
+def index():
+    return 'Hello, World!'
 
 @app.route("/callback", methods=['POST'])
 async def callback():
