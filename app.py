@@ -117,6 +117,7 @@ def daily_schedule():
     print("daily_scheduleが実行されました")
     today_schedules = minutes_get_list()
     for schedule in today_schedules:
+        print(schedule.to_dict())
         time=schedule.to_dict()["datetime"]
         time=jp_timezone.localize(datetime.strptime(time, "%Y年%m月%d日%H時%M分"))
         current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
