@@ -116,6 +116,10 @@ def scheduled_task(group_id,timer_id):
 def daily_schedule():
     print("daily_scheduleが実行されました")
     today_schedules = minutes_get_list()
+    print("#####")
+    for schedule in today_schedules:
+        print(schedule.to_dict())
+    print("#####")
     for schedule in today_schedules:
         print(schedule.to_dict())
         time=schedule.to_dict()["datetime"]
