@@ -7,7 +7,8 @@ from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError
 )
 
-from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup
+from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup, FlexSendMessage, BubbleContainer, TextComponent, BoxComponent, ButtonComponent, PostbackAction, DatetimePickerAction
+
 from time import sleep
 
 import time
@@ -55,9 +56,6 @@ db = firestore.client()
 group_doc_ref = db.collection('groups')
 schedules_doc_ref = db.collection('schedules')
 
-
-
-
 @app.route("/callback", methods=['POST'])
 async def callback():
     signature = request.headers['X-Line-Signature']
@@ -80,7 +78,35 @@ def handle_message(events):
         liff_url = f"{liff_url_base}?group_id={group_id}"
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}"))
 
+    elif events.message.text.lower() == "予定":
+        group_id = events.source.group_id # groupidを取得
 
+        flex_message = FlexSendMessage(
+            alt_text='予定日時を選択するのだ！',
+            contents=BubbleContainer(
+                body=BoxComponent(
+                    layout='vertical',
+                    contents=[
+                        TextComponent(text='予定日時を選択するのだ！', weight='bold'),
+                        ButtonComponent(
+                            action=DatetimePickerAction(
+                                label='予定日時選択',
+                                data='datetime_postback',  # Postbackデータ
+                                mode='datetime',
+                                initial=datetime.now().strftime('%Y-%m-%dT%H:%M'),
+                                max='2100-12-31T23:59',
+                                min='1900-01-01T00:00'
+                            )
+                        )
+                    ]
+                )
+            )
+        )
+        # Flex Messageと追加のテキストメッセージを送信
+        line_bot_api.reply_message(
+            events.reply_token,
+            flex_message
+        )
 
     elif events.message.text.lower() == "テスト":
         
@@ -102,6 +128,30 @@ def handle_message(events):
     else:
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text="このメッセージは無効なのだ〜"))
         return 'OK'
+
+# 予定の保存処理
+@handler.add(PostbackEvent)
+def handle_postback(events):
+    if events.postback.data == 'datetime_postback':
+        # 日時選択のPostbackデータを受け取った場合
+        selected_iso_datetime = events.postback.params['datetime']  # ISO 8601 形式の日時文字列
+
+        # ISO 8601 形式の文字列を datetime オブジェクトに変換
+        selected_datetime = datetime.fromisoformat(selected_iso_datetime)
+
+        # 日時を指定された形式の文字列に変換
+        formatted_datetime = selected_datetime.strftime("%Y年%m月%d日%H時%M分")
+
+        group_id = events.source.group_id
+        # 選択された日時に関する処理（必要に応じて）
+        schedules_doc = schedules_doc_ref.document()
+        schedules_doc.set({"datetime": formatted_datetime, "group_id": group_id})
+
+        # ユーザーに対して応答メッセージを送信
+        line_bot_api.reply_message(
+            events.reply_token,
+            TextSendMessage(text="予定が登録されたのだ！")
+        )
 
 # 定期実行する処理
 # 時間になったら実行する処理
