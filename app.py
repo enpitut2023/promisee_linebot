@@ -118,6 +118,7 @@ def daily_schedule():
     today_schedules = minutes_get_list()
     print("#####")
     for schedule in today_schedules:
+        print(schedule.id)
         print(schedule.to_dict())
     print("#####")
     for schedule in today_schedules:
@@ -142,6 +143,7 @@ def daily_get_list():
         if "datetime" in schedule_data:
             schedule_datetime = jp_timezone.localize(datetime.strptime(schedule_data["datetime"], "%Y年%m月%d日%H時%M分"))
             if schedule_datetime.date() == today.date():
+                doc["id"] = doc.id
                 today_schedules.append(doc)
     return today_schedules
 
