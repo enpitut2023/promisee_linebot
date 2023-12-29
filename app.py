@@ -155,12 +155,12 @@ def handle_postback(events):
 
 # 定期実行する処理
 # 時間になったら実行する処理
-def scheduled_task(group_id,timer_id):
+def scheduled_task(group_id,timer_id,schedule_id):
     liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?group_id={group_id}"
     message = TextSendMessage(text=f"{liff_url}")
     line_bot_api.push_message(group_id, messages=message)
     print("定期的な処理が実行されました")
-    cancel_timer(timer_id)
+    cancel_timer(timer_id, schedule_id)
 
 # 毎日0時に実行される処理
 def daily_schedule():
@@ -173,7 +173,7 @@ def daily_schedule():
         delay = max(0, (time - current_time).total_seconds())
         timer_id = str(uuid.uuid4()) 
         # タイマーを設定してイベントをスケジュール
-        timer = threading.Timer(delay, scheduled_task, args=(schedule.to_dict()["group_id"], timer_id))
+        timer = threading.Timer(delay, scheduled_task, args=(schedule.to_dict()["group_id"], timer_id, schedule.id))
         timer.start()
         timers[timer_id] = timer 
 
@@ -209,12 +209,28 @@ def minutes_get_list():
                 minutes_schedules.append(doc)
     return minutes_schedules
 
-def cancel_timer(timer_id):
+def cancel_timer(timer_id, schedule_id):
     if timer_id in timers:
         # タイマーが存在すればキャンセル
         timer = timers[timer_id]
         timer.cancel()
+        delete_schedule(schedule_id)
 
+# タイマーキャンセルと同時にスケジュールもdbから消去
+def delete_schedule(schedule_id):
+    try:
+        # 指定されたドキュメントIDに基づいてドキュメントを取得
+        schedule_delete = schedules_doc_ref.document(schedule_id)
+        
+        # ドキュメントが存在するか確認
+        if schedule_delete.get().exists:
+            # ドキュメントを削除
+            schedule_delete.delete()
+            print(f"スケジュール {schedule_id} が削除されました。")
+        else:
+            print(f"スケジュール {schedule_id} は存在しません。")
+    except Exception as e:
+        print(f"スケジュールの削除中にエラーが発生しました: {e}")
 
 
 
