@@ -49,8 +49,12 @@ format = {
 format_schedule = {
     "schedule": "schedule"
 }
+# サービス アカウント キー ファイルへのパスを環境変数から取得
+firebase_admin_key_path = os.environ.get('FIREBASE_ADMIN_KEY_PATH')
 
-cred = credentials.Certificate("key.json")
+# Firebase Admin SDK を初期化
+cred = credentials.Certificate(firebase_admin_key_path)
+
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 group_doc_ref = db.collection('groups')
