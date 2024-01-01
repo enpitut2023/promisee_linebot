@@ -82,7 +82,7 @@ def handle_message(events):
         liff_url = f"{liff_url_base}?group_id={group_id}"
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}"))
 
-    elif events.message.text.lower() == "予定":
+    elif events.message.text.lower() == "予定登録":
         group_id = events.source.group_id # groupidを取得
 
         flex_message = FlexSendMessage(
@@ -112,23 +112,7 @@ def handle_message(events):
             flex_message
         )
 
-    elif events.message.text.lower() == "テスト":
-        
-        # group_id = events.source.group_id
-        # group_doc = group_doc_ref.document(group_id) 
-        # schedule_data = group_doc.get().to_dict()["schedule"]
-        # schedule_time = datetime.strptime(schedule_data, "%Y年%m月%d日%H時%M分")
-        # schedule_time_pytz = jp_timezone.localize(schedule_time)
-        daily_schedule()
-        return 'OK'
-    elif re.match(r"([1-9]|1[0-2])月([1-9]|[12][0-9]|3[01])日([01]?[0-9]|2[0-3])時([0-5]?[0-9])分", events.message.text):
-        print("テスト")
-        group_id = events.source.group_id
-        schedule_time="2023年" + events.message.text
-        schedules_doc = schedules_doc_ref.document()
-        schedules_doc.set({"datetime": schedule_time, "group_id": group_id})   
-        line_bot_api.reply_message(events.reply_token, TextSendMessage(text="予定が登録されたのだ！"))
-        
+
     else:
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text="このメッセージは無効なのだ〜"))
         return 'OK'
@@ -154,64 +138,49 @@ def handle_postback(events):
         # ユーザーに対して応答メッセージを送信
         line_bot_api.reply_message(
             events.reply_token,
-            TextSendMessage(text="予定が登録されたのだ！")
+            TextSendMessage(text=f"{formatted_datetime}に予定が登録されたのだ！")
         )
 
 # 定期実行する処理
 # 時間になったら実行する処理
-def scheduled_task(group_id,timer_id,schedule_id):
+
+def scheduled_task(doc,timer_id):
+    group_id = schedules_doc_ref.document(doc).get().to_dict()["group_id"]
+
     liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?group_id={group_id}"
     message = TextSendMessage(text=f"{liff_url}")
     line_bot_api.push_message(group_id, messages=message)
     print("定期的な処理が実行されました")
-    cancel_timer(timer_id, schedule_id)
+    # 使用例
+    delete_data('schedules', doc)
+    cancel_timer(timer_id)
 
-# 毎日0時に実行される処理
-def daily_schedule():
+
+@app.route('/daily_schedule', methods=['POST'])
+def handle_daily_schedule():
     print("daily_scheduleが実行されました")
-    today_schedules = minutes_get_list()
-    for schedule in today_schedules:
-        time=schedule.to_dict()["datetime"]
+    today_schedules = request.get_json()
+
+    # run_schedule関数を別スレッドで実行
+    threading.Thread(target=run_schedule, args=(today_schedules,), daemon=True).start()
+
+    return "OK"
+
+def run_schedule(today_schedules):
+    print("run_scheduleが実行されました")
+
+    for doc_id in today_schedules:
+        time=schedules_doc_ref.document(doc_id).get().to_dict()["datetime"]
         time=jp_timezone.localize(datetime.strptime(time, "%Y年%m月%d日%H時%M分"))
         current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
         delay = max(0, (time - current_time).total_seconds())
         timer_id = str(uuid.uuid4()) 
         # タイマーを設定してイベントをスケジュール
-        timer = threading.Timer(delay, scheduled_task, args=(schedule.to_dict()["group_id"], timer_id, schedule.id))
-        timer.start()
-        timers[timer_id] = timer 
+        timer = threading.Timer(delay, scheduled_task, args=(doc_id, timer_id))
 
-def daily_get_list():
-    # レコードから今日の日付と同じ日時のものを選択
-    today_schedules = []
-    
-    today = datetime.now(jp_timezone).replace(hour=0, minute=0, second=0, microsecond=0)
-    for doc in schedules_doc_ref.stream():
-        schedule_data = doc.to_dict()
-        if "datetime" in schedule_data:
-            schedule_datetime = jp_timezone.localize(datetime.strptime(schedule_data["datetime"], "%Y年%m月%d日%H時%M分"))
-            if schedule_datetime.date() == today.date():
-                today_schedules.append(doc)
-    return today_schedules
+    return "OK"
 
 
-# レビュー用
-def minutes_get_list():
-    minutes_schedules = []
-    current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
-    print(current_time)
-    new_time = current_time + timedelta(minutes=1)
-    # 秒を切り捨てる
-    new_time = new_time.replace(second=0, microsecond=0)
-    print(new_time)
-    for doc in schedules_doc_ref.stream():
-        schedule_data = doc.to_dict()
-        if "datetime" in schedule_data:
-            schedule_datetime = jp_timezone.localize(datetime.strptime(schedule_data["datetime"], "%Y年%m月%d日%H時%M分"))
-            print(schedule_datetime)
-            if schedule_datetime == new_time:
-                minutes_schedules.append(doc)
-    return minutes_schedules
 
 def cancel_timer(timer_id, schedule_id):
     if timer_id in timers:
@@ -236,41 +205,31 @@ def delete_schedule(schedule_id):
     except Exception as e:
         print(f"スケジュールの削除中にエラーが発生しました: {e}")
 
+def delete_data(collection_name, document_id):
+    # 指定したコレクションから指定したドキュメントを削除
+    doc_ref = db.collection(collection_name).document(document_id)
+    doc_ref.delete()
+    print(f"Document {document_id} deleted from {collection_name} collection.")
 
 
-# タイムゾーンが一致する場合、通常通りにスケジュールを設定
-# schedule.every().day.at("00:00").do(daily_schedule)
 
 
 # スケジュールに基づいてジョブを実行する関数
-def run_schedule():
-    print("run_scheduleが実行されました")
-    schedule.every(1).minutes.do(daily_schedule)
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+# def run_schedule():
+#     print("run_scheduleが実行されました")
+#     schedule.every(1).minutes.do(daily_schedule)
+#     while True:
+#         schedule.run_pending()
+#         time.sleep(1)
 
 # Flaskアプリケーションを開始する関数
 def start_flask_app():
     app.run(debug=False, port=5002)
 
 if __name__ == "__main__":
-        # スケジュールを実行するスレッド
-    schedule_thread = threading.Thread(target=run_schedule)
-    schedule_thread.start()
 
     # Flaskアプリケーションを実行するスレッド
     flask_app_thread = threading.Thread(target=start_flask_app)
     flask_app_thread.start()
-   # 各スレッドの終了を待つ
-    schedule_thread.join()
-    flask_app_thread.join()
 
-
-    # Gunicornが呼び出すためのモジュール名を追加
-if  __name__ == "app":
-
-    # スケジュールを実行するスレッド
-    schedule_thread = threading.Thread(target=run_schedule)
-    schedule_thread.start()
 
