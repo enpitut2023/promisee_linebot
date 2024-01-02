@@ -152,8 +152,7 @@ def scheduled_task(doc,timer_id):
     line_bot_api.push_message(group_id, messages=message)
     print("定期的な処理が実行されました")
     # 使用例
-    delete_data('schedules', doc)
-    cancel_timer(timer_id)
+    cancel_timer(timer_id,doc)
 
 
 @app.route('/daily_schedule', methods=['POST'])
@@ -205,11 +204,7 @@ def delete_schedule(schedule_id):
     except Exception as e:
         print(f"スケジュールの削除中にエラーが発生しました: {e}")
 
-def delete_data(collection_name, document_id):
-    # 指定したコレクションから指定したドキュメントを削除
-    doc_ref = db.collection(collection_name).document(document_id)
-    doc_ref.delete()
-    print(f"Document {document_id} deleted from {collection_name} collection.")
+
 
 
 
