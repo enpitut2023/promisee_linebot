@@ -113,10 +113,6 @@ def handle_message(events):
         )
 
 
-    else:
-        line_bot_api.reply_message(events.reply_token, TextSendMessage(text="このメッセージは無効なのだ〜"))
-        return 'OK'
-
 # 予定の保存処理
 @handler.add(PostbackEvent)
 def handle_postback(events):
