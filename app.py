@@ -205,69 +205,69 @@ def handle_message(events):
         #         )
         #     ]
         # )
-        flex_message = FlexSendMessage(
-            alt_text="Flex Message",
-            contents=BubbleContainer(
-                hero=ImageComponent(
-                    url="https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
-                    size="full",
-                    aspect_ratio="20:13",
-                    aspect_mode="cover",
-                    action=URIAction(label="Line", uri="https://linecorp.com/")
-                ),
-                body=BoxComponent(
-                    layout="vertical",
-                    contents=[
-                        TextComponent(text="Brown Cafe", size="xl", weight="bold"),
-                        BoxComponent(
-                            layout="vertical",
-                            spacing="sm",
-                            margin="lg",
-                            contents=[
-                                BoxComponent(
-                                    layout="baseline",
-                                    spacing="sm",
-                                    contents=[
-                                        TextComponent(text="Place", flex=1, size="sm", color="#AAAAAA"),
-                                        TextComponent(text="Miraina Tower, 4-1-6 Shinjuku, Tokyo", flex=5, size="sm", color="#666666", wrap=True)
-                                    ]
-                                ),
-                                BoxComponent(
-                                    layout="baseline",
-                                    spacing="sm",
-                                    contents=[
-                                        TextComponent(text="Time", flex=1, size="sm", color="#AAAAAA"),
-                                        TextComponent(text="10:00 - 23:00", flex=5, size="sm", color="#666666", wrap=True)
-                                    ]
-                                )
-                            ]
-                        )
-                    ]
-                ),
-                footer=BoxComponent(
-                    layout="vertical",
-                    flex=0,
-                    spacing="sm",
-                    contents=[
-                        ButtonComponent(
-                            action=URIAction(label="CALL", uri="https://linecorp.com"),
-                            height="sm",
-                            style="link"
-                        ),
-                        ButtonComponent(
-                            action=URIAction(label="WEBSITE", uri="https://linecorp.com"),
-                            height="sm",
-                            style="link"
-                        )
-                    ]
+        carousel_container = CarouselContainer(
+            contents=[
+                BubbleContainer(
+                    hero=ImageComponent(
+                        url="https://d.line-scdn.net/stf/line-mall/item-photo-7203592-34809838.jpg?63448310c83a48fde0877ceb6f5dd027",
+                        size="full",
+                        aspect_ratio="2:3",
+                        aspect_mode="cover"
+                    ),
+                    body=BoxComponent(
+                        layout="vertical",
+                        contents=[
+                            TextComponent(text="Brown Cafe", size="xl", weight="bold"),
+                            BoxComponent(
+                                layout="vertical",
+                                spacing="sm",
+                                margin="lg",
+                                contents=[
+                                    BoxComponent(
+                                        layout="baseline",
+                                        spacing="sm",
+                                        contents=[
+                                            TextComponent(text="Place", flex=1, size="sm", color="#AAAAAA"),
+                                            TextComponent(text="Miraina Tower, 4-1-6 Shinjuku, Tokyo", flex=5, size="sm", color="#666666", wrap=True)
+                                        ]
+                                    ),
+                                    BoxComponent(
+                                        layout="baseline",
+                                        spacing="sm",
+                                        contents=[
+                                            TextComponent(text="Time", flex=1, size="sm", color="#AAAAAA"),
+                                            TextComponent(text="10:00 - 23:00", flex=5, size="sm", color="#666666", wrap=True)
+                                        ]
+                                    )
+                                ]
+                            )
+                        ]
+                    ),
+                    footer=BoxComponent(
+                        layout="vertical",
+                        flex=0,
+                        spacing="sm",
+                        contents=[
+                            ButtonComponent(
+                                action=URIAction(label="CALL", uri="https://linecorp.com"),
+                                height="sm",
+                                style="link"
+                            ),
+                            ButtonComponent(
+                                action=URIAction(label="WEBSITE", uri="https://linecorp.com"),
+                                height="sm",
+                                style="link"
+                            )
+                        ]
+                    )
                 )
-            )
+            ]
         )
 
-        # flex_message = FlexSendMessage(
-        #     alt_text='Flex Message',
-        #     contents=carousel_container
-        # )
+        flex_message = FlexSendMessage(
+            alt_text='Flex Message',
+            contents=carousel_container
+        )
         line_bot_api.reply_message(
             events.reply_token,
             flex_message
