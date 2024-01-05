@@ -160,6 +160,10 @@ def handle_message(events):
                 )
             )
         )
+        line_bot_api.reply_message(
+            events.reply_token,
+            flex_message
+        )
 
 @handler.add(MemberJoinedEvent)
 def handle_member_joined(event):
