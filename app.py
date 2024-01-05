@@ -139,6 +139,14 @@ def handle_message(events):
             contents=[
                 # カード1
                 BubbleContainer(
+                    size='micro',
+                    background=ImageComponent(
+                        url='https://d.line-scdn.net/stf/line-mall/item-photo-7203592-34809838.jpg?63448310c83a48fde0877ceb6f5dd027',
+                        size='full',
+                        aspectMode='cover',
+                        aspectRatio='2:3',
+                        position='center'
+                    ),
                     body=BoxComponent(
                         layout='vertical',
                         contents=[
@@ -153,10 +161,18 @@ def handle_message(events):
                 ),
                 # カード2
                 BubbleContainer(
+                    size='micro',
+                    background=ImageComponent(
+                        url='https://d.line-scdn.net/stf/line-mall/item-photo-7051436-38009042.jpg?82b2f5e297660b191f058b866ea2def5',
+                        size='full',
+                        aspectMode='cover',
+                        aspectRatio='2:3',
+                        position='center'
+                    ),
                     body=BoxComponent(
                         layout='vertical',
                         contents=[
-                            TextComponent(text='¥100~¥300', weight='bold', size='xl'),
+                            TextComponent(text='¥101~¥300', weight='bold', size='xl'),
                             ButtonComponent(
                                 style='primary',
                                 action=URIAction(label='選択', uri='https://example.com/path2'),
@@ -167,10 +183,18 @@ def handle_message(events):
                 ),
                 # カード3
                 BubbleContainer(
+                    size='micro',
+                    background=ImageComponent(
+                        url='https://d.line-scdn.net/stf/line-mall/item-photo-6406063-38461177.jpg?4686f5144306f3a4b9fdf8baa88854ca',
+                        size='full',
+                        aspectMode='cover',
+                        aspectRatio='2:3',
+                        position='center'
+                    ),
                     body=BoxComponent(
                         layout='vertical',
                         contents=[
-                            TextComponent(text='¥300~¥500', weight='bold', size='xl'),
+                            TextComponent(text='¥301~¥500', weight='bold', size='xl'),
                             ButtonComponent(
                                 style='primary',
                                 action=URIAction(label='選択', uri='https://example.com/path3'),
