@@ -7,7 +7,7 @@ from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError
 )
 
-from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup, FlexSendMessage, BubbleContainer, TextComponent, BoxComponent, ButtonComponent, PostbackAction, DatetimePickerAction
+from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup, FlexSendMessage, BubbleContainer, TextComponent, BoxComponent, ButtonComponent, PostbackAction, DatetimePickerAction, MemberJoinedEvent
 
 from time import sleep
 
@@ -69,6 +69,17 @@ async def callback():
         print("Invalid signature. Please check your channel access token/channel secret.")
         abort(400)
     return 'OK'
+
+@handler.add(MemberJoinedEvent)
+def handle_member_joined(event):
+    # グループメンバーが参加したときの処理
+    group_id = event.source.group_id
+    welcome_message = f"よろしくなのだ！予定の日時を登録したいときは「」と送るのだ！"
+    
+    line_bot_api.push_message(
+        group_id,
+        TextSendMessage(text=welcome_message)
+    )
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(events):
