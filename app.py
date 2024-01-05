@@ -9,7 +9,7 @@ from linebot.exceptions import (
 
 from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup, FlexSendMessage, BubbleContainer, TextComponent, BoxComponent, ButtonComponent, PostbackAction, DatetimePickerAction, MemberJoinedEvent
 
-from linebot.models import FlexSendMessage, BubbleContainer, ImageComponent, BoxComponent, TextComponent, ButtonComponent, SpacerComponent, URIAction
+from linebot.models import FlexSendMessage, BubbleContainer, ImageComponent, BoxComponent, TextComponent, ButtonComponent, URIAction
 
 from time import sleep
 
@@ -145,13 +145,11 @@ def handle_message(events):
                             action=URIAction(label='1~100', uri='https://example.com/path1'),
                             color='#00ff00'
                         ),
-                        SpacerComponent(size='md'),
                         ButtonComponent(
                             style='primary',
                             action=URIAction(label='100~300', uri='https://example.com/path2'),
                             color='#0000ff'
                         ),
-                        SpacerComponent(size='md'),
                         ButtonComponent(
                             style='primary',
                             action=URIAction(label='300~500', uri='https://example.com/path3'),
