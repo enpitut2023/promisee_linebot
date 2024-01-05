@@ -135,81 +135,149 @@ def handle_message(events):
         liff_url = f"{liff_url_base}/gifts"
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
     elif events.message.text.lower() == "ギフト設定":
-        carousel_container = CarouselContainer(
-            contents=[
-                # カード1
-                BubbleContainer(
-                    size='micro',
-                    background=ImageComponent(
-                        url='https://d.line-scdn.net/stf/line-mall/item-photo-7203592-34809838.jpg?63448310c83a48fde0877ceb6f5dd027',
-                        size='full',
-                        aspectMode='cover',
-                        aspectRatio='2:3',
-                        position='center'
-                    ),
-                    body=BoxComponent(
-                        layout='vertical',
-                        contents=[
-                            TextComponent(text='~¥100', weight='bold', size='xl'),
-                            ButtonComponent(
-                                style='primary',
-                                action=URIAction(label='選択', uri='https://example.com/path1'),
-                                color='#00ff00'
-                            )
-                        ]
-                    )
+        # carousel_container = CarouselContainer(
+        #     contents=[
+        #         # カード1
+        #         BubbleContainer(
+        #             size='micro',
+        #             background=ImageComponent(
+        #                 url='https://d.line-scdn.net/stf/line-mall/item-photo-7203592-34809838.jpg?63448310c83a48fde0877ceb6f5dd027',
+        #                 size='full',
+        #                 aspectMode='cover',
+        #                 aspectRatio='2:3',
+        #                 position='center'
+        #             ),
+        #             body=BoxComponent(
+        #                 layout='vertical',
+        #                 contents=[
+        #                     TextComponent(text='~¥100', weight='bold', size='xl'),
+        #                     ButtonComponent(
+        #                         style='primary',
+        #                         action=URIAction(label='選択', uri='https://example.com/path1'),
+        #                         color='#00ff00'
+        #                     )
+        #                 ]
+        #             )
+        #         ),
+        #         # カード2
+        #         BubbleContainer(
+        #             size='micro',
+        #             background=ImageComponent(
+        #                 url='https://d.line-scdn.net/stf/line-mall/item-photo-7051436-38009042.jpg?82b2f5e297660b191f058b866ea2def5',
+        #                 size='full',
+        #                 aspectMode='cover',
+        #                 aspectRatio='2:3',
+        #                 position='center'
+        #             ),
+        #             body=BoxComponent(
+        #                 layout='vertical',
+        #                 contents=[
+        #                     TextComponent(text='¥101~¥300', weight='bold', size='xl'),
+        #                     ButtonComponent(
+        #                         style='primary',
+        #                         action=URIAction(label='選択', uri='https://example.com/path2'),
+        #                         color='#0000ff'
+        #                     )
+        #                 ]
+        #             )
+        #         ),
+        #         # カード3
+        #         BubbleContainer(
+        #             size='micro',
+        #             background=ImageComponent(
+        #                 url='https://d.line-scdn.net/stf/line-mall/item-photo-6406063-38461177.jpg?4686f5144306f3a4b9fdf8baa88854ca',
+        #                 size='full',
+        #                 aspectMode='cover',
+        #                 aspectRatio='2:3',
+        #                 position='center'
+        #             ),
+        #             body=BoxComponent(
+        #                 layout='vertical',
+        #                 contents=[
+        #                     TextComponent(text='¥301~¥500', weight='bold', size='xl'),
+        #                     ButtonComponent(
+        #                         style='primary',
+        #                         action=URIAction(label='選択', uri='https://example.com/path3'),
+        #                         color='#ff0000'
+        #                     )
+        #                 ]
+        #             )
+        #         )
+        #     ]
+        # )
+        flex_message = FlexSendMessage(
+            alt_text="Flex Message",
+            contents=BubbleContainer(
+                hero=ImageComponent(
+                    url="https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
+                    size="full",
+                    aspect_ratio="20:13",
+                    aspect_mode="cover",
+                    action=URIAction(label="Line", uri="https://linecorp.com/")
                 ),
-                # カード2
-                BubbleContainer(
-                    size='micro',
-                    background=ImageComponent(
-                        url='https://d.line-scdn.net/stf/line-mall/item-photo-7051436-38009042.jpg?82b2f5e297660b191f058b866ea2def5',
-                        size='full',
-                        aspectMode='cover',
-                        aspectRatio='2:3',
-                        position='center'
-                    ),
-                    body=BoxComponent(
-                        layout='vertical',
-                        contents=[
-                            TextComponent(text='¥101~¥300', weight='bold', size='xl'),
-                            ButtonComponent(
-                                style='primary',
-                                action=URIAction(label='選択', uri='https://example.com/path2'),
-                                color='#0000ff'
-                            )
-                        ]
-                    )
+                body=BoxComponent(
+                    layout="vertical",
+                    contents=[
+                        TextComponent(text="Brown Cafe", size="xl", weight="bold"),
+                        BoxComponent(
+                            layout="baseline",
+                            margin="md",
+                            contents=[
+                                ImageComponent(url="https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png", size="sm") for _ in range(4)
+                            ] + [
+                                ImageComponent(url="https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gray_star_28.png", size="sm"),
+                                TextComponent(text="4.0", flex=0, margin="md", size="sm", color="#999999")
+                            ]
+                        ),
+                        BoxComponent(
+                            layout="vertical",
+                            spacing="sm",
+                            margin="lg",
+                            contents=[
+                                BoxComponent(
+                                    layout="baseline",
+                                    spacing="sm",
+                                    contents=[
+                                        TextComponent(text="Place", flex=1, size="sm", color="#AAAAAA"),
+                                        TextComponent(text="Miraina Tower, 4-1-6 Shinjuku, Tokyo", flex=5, size="sm", color="#666666", wrap=True)
+                                    ]
+                                ),
+                                BoxComponent(
+                                    layout="baseline",
+                                    spacing="sm",
+                                    contents=[
+                                        TextComponent(text="Time", flex=1, size="sm", color="#AAAAAA"),
+                                        TextComponent(text="10:00 - 23:00", flex=5, size="sm", color="#666666", wrap=True)
+                                    ]
+                                )
+                            ]
+                        )
+                    ]
                 ),
-                # カード3
-                BubbleContainer(
-                    size='micro',
-                    background=ImageComponent(
-                        url='https://d.line-scdn.net/stf/line-mall/item-photo-6406063-38461177.jpg?4686f5144306f3a4b9fdf8baa88854ca',
-                        size='full',
-                        aspectMode='cover',
-                        aspectRatio='2:3',
-                        position='center'
-                    ),
-                    body=BoxComponent(
-                        layout='vertical',
-                        contents=[
-                            TextComponent(text='¥301~¥500', weight='bold', size='xl'),
-                            ButtonComponent(
-                                style='primary',
-                                action=URIAction(label='選択', uri='https://example.com/path3'),
-                                color='#ff0000'
-                            )
-                        ]
-                    )
+                footer=BoxComponent(
+                    layout="vertical",
+                    flex=0,
+                    spacing="sm",
+                    contents=[
+                        ButtonComponent(
+                            action=URIAction(label="CALL", uri="https://linecorp.com"),
+                            height="sm",
+                            style="link"
+                        ),
+                        ButtonComponent(
+                            action=URIAction(label="WEBSITE", uri="https://linecorp.com"),
+                            height="sm",
+                            style="link"
+                        )
+                    ]
                 )
-            ]
+            )
         )
 
-        flex_message = FlexSendMessage(
-            alt_text='Flex Message',
-            contents=carousel_container
-        )
+        # flex_message = FlexSendMessage(
+        #     alt_text='Flex Message',
+        #     contents=carousel_container
+        # )
         line_bot_api.reply_message(
             events.reply_token,
             flex_message
