@@ -128,6 +128,10 @@ def handle_message(events):
             events.reply_token,
             flex_message
         )
+    elif events.message.text.lower() == "テスト":
+        group_id = events.source.group_id
+        liff_url = f"{liff_url_base}/gifts"
+        line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
 
 @handler.add(MemberJoinedEvent)
 def handle_member_joined(event):
