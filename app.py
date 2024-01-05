@@ -220,14 +220,6 @@ def handle_message(events):
                     contents=[
                         TextComponent(text="Brown Cafe", size="xl", weight="bold"),
                         BoxComponent(
-                            layout="baseline",
-                            margin="md",
-                            contents=[
-                                ImageComponent(url="https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gray_star_28.png", size="sm"),
-                                TextComponent(text="4.0", flex=0, margin="md", size="sm", color="#999999")
-                            ]
-                        ),
-                        BoxComponent(
                             layout="vertical",
                             spacing="sm",
                             margin="lg",
