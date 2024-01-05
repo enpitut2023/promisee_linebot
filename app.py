@@ -36,7 +36,7 @@ line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
 timers = {}
-liff_url_base = "https://liff.line.me/2002096181-Ryql27BY"
+liff_url_base = "https://liff.line.me/2002625165-347VlQvl"
 
 # データベース使い方
 schedule_format = {
