@@ -7,7 +7,7 @@ from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError
 )
 
-from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup, FlexSendMessage, BubbleContainer, TextComponent, BoxComponent, ButtonComponent, PostbackAction, DatetimePickerAction
+from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup, FlexSendMessage, BubbleContainer, TextComponent, BoxComponent, ButtonComponent, PostbackAction, DatetimePickerAction, MemberJoinedEvent
 
 from time import sleep
 
@@ -39,11 +39,12 @@ timers = {}
 liff_url_base = "https://liff.line.me/2002096181-Ryql27BY"
 
 # データベース使い方
-format = {
+schedule_format = {
     "username": [],
     "answer": [],
     "group_count": None,
-    "schedule": None,
+    "datetime": None,
+    "group_id": None,
 }
 
 
@@ -69,12 +70,23 @@ async def callback():
         abort(400)
     return 'OK'
 
+@handler.add(MemberJoinedEvent)
+def handle_member_joined(event):
+    # グループメンバーが参加したときの処理
+    group_id = event.source.group_id
+    welcome_message = f"よろしくなのだ！予定の日時を登録したいときは「」と送るのだ！"
+    
+    line_bot_api.push_message(
+        group_id,
+        TextSendMessage(text=welcome_message)
+    )
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(events):
     if events.message.text.lower() == "確認":
         group_id = events.source.group_id
         group_count = line_bot_api.get_group_members_count(group_id)
-        format['group_count'] = group_count
+        schedule_format['group_count'] = group_count
         group_doc = group_doc_ref.document(group_id)
         group_doc.set(format)
             # urlの発行時間を埋め込む
@@ -87,7 +99,7 @@ def handle_message(events):
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}"))
 
     elif events.message.text.lower() == "予定登録":
-        group_id = events.source.group_id # groupidを取得
+        group_id = events.source.group_id
 
         flex_message = FlexSendMessage(
             alt_text='予定日時を選択するのだ！',
@@ -131,6 +143,11 @@ def handle_member_joined(event):
 @handler.add(PostbackEvent)
 def handle_postback(events):
     if events.postback.data == 'datetime_postback':
+
+        group_id = events.source.group_id
+        group_count = line_bot_api.get_group_members_count(group_id)
+        schedule_format['group_count'] = group_count #group_countをschedule_formatに追加
+
         # 日時選択のPostbackデータを受け取った場合
         selected_iso_datetime = events.postback.params['datetime']  # ISO 8601 形式の日時文字列
 
@@ -143,7 +160,9 @@ def handle_postback(events):
         group_id = events.source.group_id
         # 選択された日時に関する処理（必要に応じて）
         schedules_doc = schedules_doc_ref.document()
-        schedules_doc.set({"datetime": formatted_datetime, "group_id": group_id})
+        schedule_format['datetime'] = formatted_datetime
+        schedule_format['group_id'] = group_id
+        schedules_doc.set(schedule_format)
 
         # ユーザーに対して応答メッセージを送信
         line_bot_api.reply_message(
@@ -151,25 +170,9 @@ def handle_postback(events):
             TextSendMessage(text=f"{formatted_datetime}に予定が登録されたのだ！")
         )
 
-# 定期実行する処理
-# 時間になったら実行する処理
-
-def scheduled_task(doc,timer_id):
-    group_id = schedules_doc_ref.document(doc).get().to_dict()["group_id"]
-    # # urlの発行時間を埋め込む
-    # current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
-    # # 日時を文字列に変換
-    # current_time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
-
-    # liff_urlに日時を埋め込む
-    liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?group_id={group_id}"
-    message = TextSendMessage(text=f"{liff_url}")
-    line_bot_api.push_message(group_id, messages=message)
-    print("定期的な処理が実行されました")
-    # 使用例
-    cancel_timer(timer_id,doc)
 
 
+# 定期実行により叩かれるAPI
 @app.route('/daily_schedule', methods=['POST'])
 def handle_daily_schedule():
     print("daily_scheduleAPIが叩かれました")
@@ -180,6 +183,7 @@ def handle_daily_schedule():
 
     return "OK"
 
+# 定期実行する関数
 def run_schedule(time_schedules):
     print("run_scheduleが実行されました")
 
@@ -194,6 +198,19 @@ def run_schedule(time_schedules):
         timer.start()
 
     return "OK"
+
+# 時間になったら、実行する関数
+def scheduled_task(schedule_id,timer_id):
+    group_id = schedules_doc_ref.document(schedule_id).get().to_dict()["group_id"]
+    # # urlの発行時間を埋め込む
+    # current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
+    # # 日時を文字列に変換
+    # current_time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
+    liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?schedule_id={schedule_id}"
+    message = TextSendMessage(text=f"{liff_url}")
+    line_bot_api.push_message(group_id, messages=message)
+    print("定期的な処理が実行されました")
+    cancel_timer(timer_id,schedule_id)
 
 
 
@@ -221,17 +238,6 @@ def delete_schedule(schedule_id):
         print(f"スケジュールの削除中にエラーが発生しました: {e}")
 
 
-
-
-
-
-# スケジュールに基づいてジョブを実行する関数
-# def run_schedule():
-#     print("run_scheduleが実行されました")
-#     schedule.every(1).minutes.do(daily_schedule)
-#     while True:
-#         schedule.run_pending()
-#         time.sleep(1)
 
 # Flaskアプリケーションを開始する関数
 def start_flask_app():
