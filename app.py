@@ -208,10 +208,11 @@ def handle_message(events):
         carousel_container = CarouselContainer(
             contents=[
                 BubbleContainer(
+                    size='micro',
                     hero=ImageComponent(
                         url="https://d.line-scdn.net/stf/line-mall/item-photo-7203592-34809838.jpg?63448310c83a48fde0877ceb6f5dd027",
                         size="full",
-                        aspect_ratio="2:3",
+                        aspect_ratio="3:2",
                         aspect_mode="cover"
                     ),
                     body=BoxComponent(
