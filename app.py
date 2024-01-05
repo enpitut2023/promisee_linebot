@@ -116,6 +116,16 @@ def handle_message(events):
             flex_message
         )
 
+@handler.add(MemberJoinedEvent)
+def handle_member_joined(event):
+    # グループメンバーが参加したときの処理
+    group_id = event.source.group_id
+    welcome_message = f"よろしくなのだ！予定の日時を登録したいときは「」と送るのだ！"
+    
+    line_bot_api.push_message(
+        group_id,
+        TextSendMessage(text=welcome_message)
+    )
 
 # 予定の保存処理
 @handler.add(PostbackEvent)
