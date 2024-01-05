@@ -80,10 +80,10 @@ def handle_message(events):
             # urlの発行時間を埋め込む
         current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
         # 日時を文字列に変換
-        current_time_str = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        current_time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
 
         # liff_urlに日時を埋め込む
-        liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?group_id={group_id}/&time={current_time_str}"
+        liff_url = f"{liff_url_base}?group_id={group_id}/{current_time_str}"
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}"))
 
     elif events.message.text.lower() == "予定登録":
@@ -146,13 +146,13 @@ def handle_postback(events):
 
 def scheduled_task(doc,timer_id):
     group_id = schedules_doc_ref.document(doc).get().to_dict()["group_id"]
-    # urlの発行時間を埋め込む
-    current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
-    # 日時を文字列に変換
-    current_time_str = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    # # urlの発行時間を埋め込む
+    # current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
+    # # 日時を文字列に変換
+    # current_time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
 
     # liff_urlに日時を埋め込む
-    liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?group_id={group_id}/&time={current_time_str}"
+    liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?group_id={group_id}"
     message = TextSendMessage(text=f"{liff_url}")
     line_bot_api.push_message(group_id, messages=message)
     print("定期的な処理が実行されました")
