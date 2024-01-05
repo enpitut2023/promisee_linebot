@@ -213,52 +213,36 @@ def handle_message(events):
                         url="https://d.line-scdn.net/stf/line-mall/item-photo-7203592-34809838.jpg?63448310c83a48fde0877ceb6f5dd027",
                         size="full",
                         aspect_ratio="3:2",
-                        aspect_mode="cover"
+                        aspect_mode="cover",
+                        action=PostbackAction(label="View", data="1-100")
                     ),
                     body=BoxComponent(
                         layout="vertical",
                         contents=[
-                            TextComponent(text="Brown Cafe", size="xl", weight="bold"),
-                            BoxComponent(
-                                layout="vertical",
-                                spacing="sm",
-                                margin="lg",
-                                contents=[
-                                    BoxComponent(
-                                        layout="baseline",
-                                        spacing="sm",
-                                        contents=[
-                                            TextComponent(text="Place", flex=1, size="sm", color="#AAAAAA"),
-                                            TextComponent(text="Miraina Tower, 4-1-6 Shinjuku, Tokyo", flex=5, size="sm", color="#666666", wrap=True)
-                                        ]
-                                    ),
-                                    BoxComponent(
-                                        layout="baseline",
-                                        spacing="sm",
-                                        contents=[
-                                            TextComponent(text="Time", flex=1, size="sm", color="#AAAAAA"),
-                                            TextComponent(text="10:00 - 23:00", flex=5, size="sm", color="#666666", wrap=True)
-                                        ]
-                                    )
-                                ]
-                            )
-                        ]
-                    ),
-                    footer=BoxComponent(
-                        layout="vertical",
-                        flex=0,
-                        spacing="sm",
-                        contents=[
-                            ButtonComponent(
-                                action=URIAction(label="CALL", uri="https://linecorp.com"),
-                                height="sm",
-                                style="link"
-                            ),
-                            ButtonComponent(
-                                action=URIAction(label="WEBSITE", uri="https://linecorp.com"),
-                                height="sm",
-                                style="link"
-                            )
+                            TextComponent(text="~¥100", size="sm", weight="bold"),
+                            # BoxComponent(
+                            #     layout="vertical",
+                            #     spacing="sm",
+                            #     margin="lg",
+                            #     contents=[
+                            #         BoxComponent(
+                            #             layout="baseline",
+                            #             spacing="sm",
+                            #             contents=[
+                            #                 TextComponent(text="Place", flex=1, size="sm", color="#AAAAAA"),
+                            #                 TextComponent(text="Miraina Tower, 4-1-6 Shinjuku, Tokyo", flex=5, size="sm", color="#666666", wrap=True)
+                            #             ]
+                            #         ),
+                            #         BoxComponent(
+                            #             layout="baseline",
+                            #             spacing="sm",
+                            #             contents=[
+                            #                 TextComponent(text="Time", flex=1, size="sm", color="#AAAAAA"),
+                            #                 TextComponent(text="10:00 - 23:00", flex=5, size="sm", color="#666666", wrap=True)
+                            #             ]
+                            #         )
+                            #     ]
+                            # )
                         ]
                     )
                 )
@@ -315,7 +299,8 @@ def handle_postback(events):
             events.reply_token,
             TextSendMessage(text=f"{formatted_datetime}に予定が登録されたのだ！")
         )
-
+    elif events.postback.data == '1-100':
+        print("$#$#$#$#$#$")
 
 
 # 定期実行により叩かれるAPI
