@@ -223,8 +223,6 @@ def handle_message(events):
                             layout="baseline",
                             margin="md",
                             contents=[
-                                ImageComponent(url="https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png", size="sm") for _ in range(4)
-                            ] + [
                                 ImageComponent(url="https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gray_star_28.png", size="sm"),
                                 TextComponent(text="4.0", flex=0, margin="md", size="sm", color="#999999")
                             ]
