@@ -46,9 +46,7 @@ format = {
     "schedule": None,
 }
 
-format_schedule = {
-    "schedule": "schedule"
-}
+
 # サービス アカウント キー ファイルへのパスを環境変数から取得
 firebase_admin_key_path = os.environ.get('FIREBASE_ADMIN_KEY_PATH')
 
@@ -79,7 +77,13 @@ def handle_message(events):
         format['group_count'] = group_count
         group_doc = group_doc_ref.document(group_id)
         group_doc.set(format)
-        liff_url = f"{liff_url_base}?group_id={group_id}"
+            # urlの発行時間を埋め込む
+        current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
+        # 日時を文字列に変換
+        current_time_str = current_time.strftime("%Y-%m-%d %H:%M:%S")
+
+        # liff_urlに日時を埋め込む
+        liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?group_id={group_id}/&time={current_time_str}"
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}"))
 
     elif events.message.text.lower() == "予定登録":
@@ -142,8 +146,13 @@ def handle_postback(events):
 
 def scheduled_task(doc,timer_id):
     group_id = schedules_doc_ref.document(doc).get().to_dict()["group_id"]
+    # urlの発行時間を埋め込む
+    current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
+    # 日時を文字列に変換
+    current_time_str = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
-    liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?group_id={group_id}"
+    # liff_urlに日時を埋め込む
+    liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?group_id={group_id}/&time={current_time_str}"
     message = TextSendMessage(text=f"{liff_url}")
     line_bot_api.push_message(group_id, messages=message)
     print("定期的な処理が実行されました")
@@ -153,18 +162,18 @@ def scheduled_task(doc,timer_id):
 
 @app.route('/daily_schedule', methods=['POST'])
 def handle_daily_schedule():
-    print("daily_scheduleが実行されました")
-    today_schedules = request.get_json()
+    print("daily_scheduleAPIが叩かれました")
+    time_schedules = request.get_json()
 
     # run_schedule関数を別スレッドで実行
-    threading.Thread(target=run_schedule, args=(today_schedules,), daemon=True).start()
+    threading.Thread(target=run_schedule, args=(time_schedules,), daemon=True).start()
 
     return "OK"
 
-def run_schedule(today_schedules):
+def run_schedule(time_schedules):
     print("run_scheduleが実行されました")
 
-    for doc_id in today_schedules:
+    for doc_id in time_schedules:
         time=schedules_doc_ref.document(doc_id).get().to_dict()["datetime"]
         time=jp_timezone.localize(datetime.strptime(time, "%Y年%m月%d日%H時%M分"))
         current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
@@ -172,6 +181,7 @@ def run_schedule(today_schedules):
         timer_id = str(uuid.uuid4()) 
         # タイマーを設定してイベントをスケジュール
         timer = threading.Timer(delay, scheduled_task, args=(doc_id, timer_id))
+        timer.start()
 
     return "OK"
 
