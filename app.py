@@ -149,7 +149,7 @@ def handle_message(events):
                     body=BoxComponent(
                         layout="vertical",
                         contents=[
-                            TextComponent(text="~¥100", size="lg", weight="bold", align="center"),
+                            TextComponent(text="~¥100", size="md", weight="bold", align="center"),
                         ]
                     )
                 ),
@@ -165,7 +165,7 @@ def handle_message(events):
                     body=BoxComponent(
                         layout="vertical",
                         contents=[
-                            TextComponent(text="¥101~¥300", size="lg", weight="bold", align="center"),
+                            TextComponent(text="¥101~¥300", size="md", weight="bold", align="center"),
                         ]
                     )
                 ),
@@ -181,7 +181,7 @@ def handle_message(events):
                     body=BoxComponent(
                         layout="vertical",
                         contents=[
-                            TextComponent(text="¥301~¥500", size="lg", weight="bold", align="center"),
+                            TextComponent(text="¥301~¥500", size="md", weight="bold", align="center"),
                         ]
                     )
                 )
@@ -239,16 +239,37 @@ def handle_postback(events):
             TextSendMessage(text=f"{formatted_datetime}に予定が登録されたのだ！")
         )
     if events.postback.data == '1-100':
+        group_id = events.source.group_id
+        group = db.collection('groups').document(group_id)
+        group.update({
+            'min_price': 1,
+            'max_price': 100
+        })
+
         line_bot_api.reply_message(
             events.reply_token,
             TextSendMessage(text="ギフトの値段が~¥100に設定されたのだ！")
         )
     elif events.postback.data == '101-300':
+        group_id = events.source.group_id
+        group = db.collection('groups').document(group_id)
+        group.update({
+            'min_price': 101,
+            'max_price': 300
+        })
+
         line_bot_api.reply_message(
             events.reply_token,
             TextSendMessage(text="ギフトの値段が¥101~¥300に設定されたのだ！")
         )
     elif events.postback.data == '301-500':
+        group_id = events.source.group_id
+        group = db.collection('groups').document(group_id)
+        group.update({
+            'min_price': 301,
+            'max_price': 500
+        })
+
         line_bot_api.reply_message(
             events.reply_token,
             TextSendMessage(text="ギフトの値段が¥301~¥500に設定されたのだ！")
