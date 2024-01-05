@@ -46,9 +46,7 @@ format = {
     "schedule": None,
 }
 
-format_schedule = {
-    "schedule": "schedule"
-}
+
 # サービス アカウント キー ファイルへのパスを環境変数から取得
 firebase_admin_key_path = os.environ.get('FIREBASE_ADMIN_KEY_PATH')
 
@@ -142,8 +140,9 @@ def handle_postback(events):
 
 def scheduled_task(doc,timer_id):
     group_id = schedules_doc_ref.document(doc).get().to_dict()["group_id"]
-
-    liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?group_id={group_id}"
+    # urlの発行時間を埋め込む
+    current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
+    liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?group_id={group_id}/&time={current_time} "
     message = TextSendMessage(text=f"{liff_url}")
     line_bot_api.push_message(group_id, messages=message)
     print("定期的な処理が実行されました")
