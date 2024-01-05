@@ -219,7 +219,7 @@ def handle_message(events):
                     body=BoxComponent(
                         layout="vertical",
                         contents=[
-                            TextComponent(text="~¥100", size="sm", weight="bold"),
+                            TextComponent(text="~¥100", size="lg", weight="bold"),
                             # BoxComponent(
                             #     layout="vertical",
                             #     spacing="sm",
@@ -300,7 +300,10 @@ def handle_postback(events):
             TextSendMessage(text=f"{formatted_datetime}に予定が登録されたのだ！")
         )
     elif events.postback.data == '1-100':
-        print("$#$#$#$#$#$")
+        line_bot_api.reply_message(
+            events.reply_token,
+            TextSendMessage(text="ギフトの値段が設定されたのだ！")
+        )
 
 
 # 定期実行により叩かれるAPI
