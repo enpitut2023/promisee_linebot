@@ -36,7 +36,7 @@ line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
 timers = {}
-liff_url_base = "https://liff.line.me/2002625165-347VlQvl"
+liff_url_base = "https://liff.line.me/2002096181-Ryql27BY"
 
 # データベース使い方
 schedule_format = {
@@ -52,8 +52,7 @@ schedule_format = {
 firebase_admin_key_path = os.environ.get('FIREBASE_ADMIN_KEY_PATH')
 
 # Firebase Admin SDK を初期化
-# cred = credentials.Certificate(firebase_admin_key_path)
-cred = credentials.Certificate("key.json")
+cred = credentials.Certificate(firebase_admin_key_path)
 
 firebase_admin.initialize_app(cred)
 db = firestore.client()
