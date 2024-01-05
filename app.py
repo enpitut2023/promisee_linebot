@@ -152,18 +152,18 @@ def scheduled_task(doc,timer_id):
 
 @app.route('/daily_schedule', methods=['POST'])
 def handle_daily_schedule():
-    print("daily_scheduleが実行されました")
-    today_schedules = request.get_json()
+    print("daily_scheduleAPIが叩かれました")
+    time_schedules = request.get_json()
 
     # run_schedule関数を別スレッドで実行
-    threading.Thread(target=run_schedule, args=(today_schedules,), daemon=True).start()
+    threading.Thread(target=run_schedule, args=(time_schedules,), daemon=True).start()
 
     return "OK"
 
-def run_schedule(today_schedules):
+def run_schedule(time_schedules):
     print("run_scheduleが実行されました")
 
-    for doc_id in today_schedules:
+    for doc_id in time_schedules:
         time=schedules_doc_ref.document(doc_id).get().to_dict()["datetime"]
         time=jp_timezone.localize(datetime.strptime(time, "%Y年%m月%d日%H時%M分"))
         current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
@@ -171,6 +171,7 @@ def run_schedule(today_schedules):
         timer_id = str(uuid.uuid4()) 
         # タイマーを設定してイベントをスケジュール
         timer = threading.Timer(delay, scheduled_task, args=(doc_id, timer_id))
+        timer.start()
 
     return "OK"
 
