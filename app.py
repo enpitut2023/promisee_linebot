@@ -9,6 +9,8 @@ from linebot.exceptions import (
 
 from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup, FlexSendMessage, BubbleContainer, TextComponent, BoxComponent, ButtonComponent, PostbackAction, DatetimePickerAction, MemberJoinedEvent
 
+from linebot.models import FlexSendMessage, BubbleContainer, ImageComponent, BoxComponent, TextComponent, ButtonComponent, SpacerComponent, URIAction
+
 from time import sleep
 
 import time
@@ -126,6 +128,38 @@ def handle_message(events):
         line_bot_api.reply_message(
             events.reply_token,
             flex_message
+        )
+    elif events.message.text.lower() == "テスト":
+        group_id = events.source.group_id
+        liff_url = f"{liff_url_base}/gifts"
+        line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
+    elif events.message.text.lower() == "ギフト設定":
+        flex_message = FlexSendMessage(
+            alt_text='Flex Message',
+            contents=BubbleContainer(
+                body=BoxComponent(
+                    layout='vertical',
+                    contents=[
+                        ButtonComponent(
+                            style='primary',
+                            action=URIAction(label='1~100', uri='https://example.com/path1'),
+                            color='#00ff00'
+                        ),
+                        SpacerComponent(size='md'),
+                        ButtonComponent(
+                            style='primary',
+                            action=URIAction(label='100~300', uri='https://example.com/path2'),
+                            color='#0000ff'
+                        ),
+                        SpacerComponent(size='md'),
+                        ButtonComponent(
+                            style='primary',
+                            action=URIAction(label='300~500', uri='https://example.com/path3'),
+                            color='#ff0000'
+                        )
+                    ]
+                )
+            )
         )
 
 @handler.add(MemberJoinedEvent)
