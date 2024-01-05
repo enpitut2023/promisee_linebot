@@ -54,7 +54,8 @@ schedule_format = {
 firebase_admin_key_path = os.environ.get('FIREBASE_ADMIN_KEY_PATH')
 
 # Firebase Admin SDK を初期化
-cred = credentials.Certificate(firebase_admin_key_path)
+# cred = credentials.Certificate(firebase_admin_key_path)
+cred = credentials.Certificate("key.json")
 
 firebase_admin.initialize_app(cred)
 db = firestore.client()
