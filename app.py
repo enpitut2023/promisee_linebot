@@ -135,76 +135,6 @@ def handle_message(events):
         liff_url = f"{liff_url_base}/gifts"
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
     elif events.message.text.lower() == "ギフト設定":
-        # carousel_container = CarouselContainer(
-        #     contents=[
-        #         # カード1
-        #         BubbleContainer(
-        #             size='micro',
-        #             background=ImageComponent(
-        #                 url='https://d.line-scdn.net/stf/line-mall/item-photo-7203592-34809838.jpg?63448310c83a48fde0877ceb6f5dd027',
-        #                 size='full',
-        #                 aspectMode='cover',
-        #                 aspectRatio='2:3',
-        #                 position='center'
-        #             ),
-        #             body=BoxComponent(
-        #                 layout='vertical',
-        #                 contents=[
-        #                     TextComponent(text='~¥100', weight='bold', size='xl'),
-        #                     ButtonComponent(
-        #                         style='primary',
-        #                         action=URIAction(label='選択', uri='https://example.com/path1'),
-        #                         color='#00ff00'
-        #                     )
-        #                 ]
-        #             )
-        #         ),
-        #         # カード2
-        #         BubbleContainer(
-        #             size='micro',
-        #             background=ImageComponent(
-        #                 url='https://d.line-scdn.net/stf/line-mall/item-photo-7051436-38009042.jpg?82b2f5e297660b191f058b866ea2def5',
-        #                 size='full',
-        #                 aspectMode='cover',
-        #                 aspectRatio='2:3',
-        #                 position='center'
-        #             ),
-        #             body=BoxComponent(
-        #                 layout='vertical',
-        #                 contents=[
-        #                     TextComponent(text='¥101~¥300', weight='bold', size='xl'),
-        #                     ButtonComponent(
-        #                         style='primary',
-        #                         action=URIAction(label='選択', uri='https://example.com/path2'),
-        #                         color='#0000ff'
-        #                     )
-        #                 ]
-        #             )
-        #         ),
-        #         # カード3
-        #         BubbleContainer(
-        #             size='micro',
-        #             background=ImageComponent(
-        #                 url='https://d.line-scdn.net/stf/line-mall/item-photo-6406063-38461177.jpg?4686f5144306f3a4b9fdf8baa88854ca',
-        #                 size='full',
-        #                 aspectMode='cover',
-        #                 aspectRatio='2:3',
-        #                 position='center'
-        #             ),
-        #             body=BoxComponent(
-        #                 layout='vertical',
-        #                 contents=[
-        #                     TextComponent(text='¥301~¥500', weight='bold', size='xl'),
-        #                     ButtonComponent(
-        #                         style='primary',
-        #                         action=URIAction(label='選択', uri='https://example.com/path3'),
-        #                         color='#ff0000'
-        #                     )
-        #                 ]
-        #             )
-        #         )
-        #     ]
-        # )
         carousel_container = CarouselContainer(
             contents=[
                 BubbleContainer(
@@ -219,30 +149,39 @@ def handle_message(events):
                     body=BoxComponent(
                         layout="vertical",
                         contents=[
-                            TextComponent(text="~¥100", size="lg", weight="bold"),
-                            # BoxComponent(
-                            #     layout="vertical",
-                            #     spacing="sm",
-                            #     margin="lg",
-                            #     contents=[
-                            #         BoxComponent(
-                            #             layout="baseline",
-                            #             spacing="sm",
-                            #             contents=[
-                            #                 TextComponent(text="Place", flex=1, size="sm", color="#AAAAAA"),
-                            #                 TextComponent(text="Miraina Tower, 4-1-6 Shinjuku, Tokyo", flex=5, size="sm", color="#666666", wrap=True)
-                            #             ]
-                            #         ),
-                            #         BoxComponent(
-                            #             layout="baseline",
-                            #             spacing="sm",
-                            #             contents=[
-                            #                 TextComponent(text="Time", flex=1, size="sm", color="#AAAAAA"),
-                            #                 TextComponent(text="10:00 - 23:00", flex=5, size="sm", color="#666666", wrap=True)
-                            #             ]
-                            #         )
-                            #     ]
-                            # )
+                            TextComponent(text="~¥100", size="lg", weight="bold", align="center"),
+                        ]
+                    )
+                ),
+                BubbleContainer(
+                    size='micro',
+                    hero=ImageComponent(
+                        url="https://d.line-scdn.net/stf/line-mall/item-photo-7051436-38009042.jpg?82b2f5e297660b191f058b866ea2def5",
+                        size="full",
+                        aspect_ratio="3:2",
+                        aspect_mode="cover",
+                        action=PostbackAction(label="View", data="101-300")
+                    ),
+                    body=BoxComponent(
+                        layout="vertical",
+                        contents=[
+                            TextComponent(text="¥101~¥300", size="lg", weight="bold", align="center"),
+                        ]
+                    )
+                ),
+                BubbleContainer(
+                    size='micro',
+                    hero=ImageComponent(
+                        url="https://d.line-scdn.net/stf/line-mall/item-photo-3669558-38454203.jpg?aec4f17fafbd42bd31771b28b86b4d92",
+                        size="full",
+                        aspect_ratio="3:2",
+                        aspect_mode="cover",
+                        action=PostbackAction(label="View", data="301-500")
+                    ),
+                    body=BoxComponent(
+                        layout="vertical",
+                        contents=[
+                            TextComponent(text="¥301~¥500", size="lg", weight="bold", align="center"),
                         ]
                     )
                 )
@@ -299,10 +238,20 @@ def handle_postback(events):
             events.reply_token,
             TextSendMessage(text=f"{formatted_datetime}に予定が登録されたのだ！")
         )
-    elif events.postback.data == '1-100':
+    if events.postback.data == '1-100':
         line_bot_api.reply_message(
             events.reply_token,
-            TextSendMessage(text="ギフトの値段が設定されたのだ！")
+            TextSendMessage(text="ギフトの値段が~¥100に設定されたのだ！")
+        )
+    elif events.postback.data == '101-300':
+        line_bot_api.reply_message(
+            events.reply_token,
+            TextSendMessage(text="ギフトの値段が¥101~¥300に設定されたのだ！")
+        )
+    elif events.postback.data == '301-500':
+        line_bot_api.reply_message(
+            events.reply_token,
+            TextSendMessage(text="ギフトの値段が¥301~¥500に設定されたのだ！")
         )
 
 
