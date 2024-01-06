@@ -132,6 +132,7 @@ def handle_message(events):
         print("max_price:", max_price)
 
         liff_url = f"{gifts_url_base}?min_price={min_price}&max_price={max_price}"
+
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
     elif events.message.text.lower() == "ギフト設定":
         carousel_container = CarouselContainer(
