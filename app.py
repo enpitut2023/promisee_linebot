@@ -131,7 +131,7 @@ def handle_message(events):
         print("min_price:", min_price)
         print("max_price:", max_price)
 
-        liff_url = f"{gifts_url_base}/gifts?min_price={min_price}&max_price={max_price}"
+        liff_url = f"{gifts_url_base}?min_price={min_price}&max_price={max_price}"
 
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
     elif events.message.text.lower() == "ギフト設定":
@@ -314,23 +314,22 @@ def cancel_timer(timer_id, schedule_id):
         # タイマーが存在すればキャンセル
         timer = timers[timer_id]
         timer.cancel()
-        delete_schedule(schedule_id)
 
-# タイマーキャンセルと同時にスケジュールもdbから消去
-def delete_schedule(schedule_id):
-    try:
-        # 指定されたドキュメントIDに基づいてドキュメントを取得
-        schedule_delete = schedules_doc_ref.document(schedule_id)
+# # タイマーキャンセルと同時にスケジュールもdbから消去
+# def delete_schedule(schedule_id):
+#     try:
+#         # 指定されたドキュメントIDに基づいてドキュメントを取得
+#         schedule_delete = schedules_doc_ref.document(schedule_id)
         
-        # ドキュメントが存在するか確認
-        if schedule_delete.get().exists:
-            # ドキュメントを削除
-            schedule_delete.delete()
-            print(f"スケジュール {schedule_id} が削除されました。")
-        else:
-            print(f"スケジュール {schedule_id} は存在しません。")
-    except Exception as e:
-        print(f"スケジュールの削除中にエラーが発生しました: {e}")
+#         # ドキュメントが存在するか確認
+#         if schedule_delete.get().exists:
+#             # ドキュメントを削除
+#             schedule_delete.delete()
+#             print(f"スケジュール {schedule_id} が削除されました。")
+#         else:
+#             print(f"スケジュール {schedule_id} は存在しません。")
+#     except Exception as e:
+#         print(f"スケジュールの削除中にエラーが発生しました: {e}")
 
 
 
