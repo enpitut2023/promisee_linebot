@@ -119,9 +119,19 @@ def handle_message(events):
         )
     elif events.message.text.lower() == "テスト":
         group_id = events.source.group_id
+        group_doc = db.collection('groups').document(group_id).get()
+        group_data = group_doc.to_dict()
+        min_price = 0
+        max_price = 1000
 
+        if 'min_price' in group_data:
+            min_price = group_data['min_price']
+        if 'max_price' in group_data:
+            max_price = group_data['max_price']
+        print("min_price:", min_price)
+        print("max_price:", max_price)
 
-        liff_url = f"{gifts_url_base}"
+        liff_url = f"{gifts_url_base}/gifts?min_price={min_price}&max_price={max_price}"
 
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
     elif events.message.text.lower() == "ギフト設定":
