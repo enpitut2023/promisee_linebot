@@ -36,7 +36,8 @@ line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
 timers = {}
-liff_url_base = "https://liff.line.me/2002096181-Ryql27BY"
+question_url_base = "https://liff.line.me/2002096181-Ryql27BY"
+gifts_url_base = "https://liff.line.me/2002640802-P70krL5V"
 
 # データベース使い方
 schedule_format = {
@@ -95,7 +96,7 @@ def handle_message(events):
         current_time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
 
         # liff_urlに日時を埋め込む
-        liff_url = f"{liff_url_base}/question?group_id={group_id}"
+        liff_url = f"{question_url_base}/question?group_id={group_id}"
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}"))
 
     elif events.message.text.lower() == "予定登録":
@@ -141,7 +142,7 @@ def handle_message(events):
         print("min_price:", min_price)
         print("max_price:", max_price)
 
-        liff_url = f"{liff_url_base}/gifts?min_price={min_price}&max_price={max_price}"
+        liff_url = f"{gifts_url_base}/gifts?min_price={min_price}&max_price={max_price}"
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
 
 
@@ -212,7 +213,7 @@ def scheduled_task(schedule_id,timer_id):
     # current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
     # # 日時を文字列に変換
     # current_time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
-    liff_url = f"{liff_url_base}/question?schedule_id={schedule_id}"
+    liff_url = f"{question_url_base}/question?schedule_id={schedule_id}"
     message = TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}")
     line_bot_api.push_message(group_id, messages=message)
     print("定期的な処理が実行されました")
