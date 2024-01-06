@@ -7,7 +7,7 @@ from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError
 )
 
-from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup, FlexSendMessage, BubbleContainer, TextComponent, BoxComponent, ButtonComponent, PostbackAction, DatetimePickerAction, MemberJoinedEvent
+from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup, FlexSendMessage, BubbleContainer, TextComponent, BoxComponent, ButtonComponent, PostbackAction, DatetimePickerAction, JoinEvent
 
 from time import sleep
 
@@ -70,11 +70,11 @@ async def callback():
         abort(400)
     return 'OK'
 
-@handler.add(MemberJoinedEvent)
+@handler.add(JoinEvent)
 def handle_member_joined(event):
     # グループメンバーが参加したときの処理
     group_id = event.source.group_id
-    welcome_message = f"よろしくなのだ！予定の日時を登録したいときは「」と送るのだ！"
+    welcome_message = f"よろしくなのだ！予定の日時を登録したいときは「予定登録」と送るのだ！"
     
     line_bot_api.push_message(
         group_id,
@@ -196,8 +196,8 @@ def scheduled_task(schedule_id,timer_id):
     # current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
     # # 日時を文字列に変換
     # current_time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
-    liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?schedule_id={schedule_id}"
-    message = TextSendMessage(text=f"{liff_url}")
+    liff_url = liff_url_base + f'?schedule_id={schedule_id}'
+    message = TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}")
     line_bot_api.push_message(group_id, messages=message)
     print("定期的な処理が実行されました")
     cancel_timer(timer_id,schedule_id)
