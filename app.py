@@ -95,7 +95,7 @@ def handle_message(events):
         current_time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
 
         # liff_urlに日時を埋め込む
-        liff_url = f"{liff_url_base}?group_id={group_id}/{current_time_str}"
+        liff_url = f"{liff_url_base}/question?group_id={group_id}"
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}"))
 
     elif events.message.text.lower() == "予定登録":
@@ -127,6 +127,22 @@ def handle_message(events):
             events.reply_token,
             flex_message
         )
+    elif events.message.text.lower() == "テスト":
+        group_id = events.source.group_id
+        group_doc = db.collection('groups').document(group_id).get()
+        group_data = group_doc.to_dict()
+        min_price = 0
+        max_price = 1000
+        
+        if 'min_price' in group_data:
+            min_price = group_data['min_price']
+        if 'max_price' in group_data:
+            max_price = group_data['max_price']
+        print("min_price:", min_price)
+        print("max_price:", max_price)
+
+        liff_url = f"{liff_url_base}/gifts?min_price={min_price}&max_price={max_price}"
+        line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
 
 
 # 予定の保存処理
@@ -196,7 +212,7 @@ def scheduled_task(schedule_id,timer_id):
     # current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
     # # 日時を文字列に変換
     # current_time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
-    liff_url = liff_url_base + f'?schedule_id={schedule_id}'
+    liff_url = f"{liff_url_base}/question?schedule_id={schedule_id}"
     message = TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}")
     line_bot_api.push_message(group_id, messages=message)
     print("定期的な処理が実行されました")
