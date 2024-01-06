@@ -39,7 +39,8 @@ handler = WebhookHandler(CHANNEL_SECRET)
 
 timers = {}
 question_url_base = "https://liff.line.me/2002096181-Ryql27BY"
-gifts_url_base = "https://liff.line.me/2002640802-P70krL5V"
+gifts_url_base = "https://liff.line.me/2002642249-Lq0RX2ZN"
+
 
 # データベース使い方
 schedule_format = {
@@ -86,22 +87,8 @@ def handle_member_joined(event):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(events):
-    if events.message.text.lower() == "確認":
-        group_id = events.source.group_id
-        group_count = line_bot_api.get_group_members_count(group_id)
-        schedule_format['group_count'] = group_count
-        group_doc = group_doc_ref.document(group_id)
-        group_doc.set(format)
-            # urlの発行時間を埋め込む
-        current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
-        # 日時を文字列に変換
-        current_time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
 
-        # liff_urlに日時を埋め込む
-        liff_url = f"{question_url_base}/question?group_id={group_id}"
-        line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}"))
-
-    elif events.message.text.lower() == "予定登録":
+    if events.message.text.lower() == "予定登録":
         group_id = events.source.group_id
 
         flex_message = FlexSendMessage(
@@ -132,19 +119,10 @@ def handle_message(events):
         )
     elif events.message.text.lower() == "テスト":
         group_id = events.source.group_id
-        group_doc = db.collection('groups').document(group_id).get()
-        group_data = group_doc.to_dict()
-        min_price = 0
-        max_price = 1000
 
-        if 'min_price' in group_data:
-            min_price = group_data['min_price']
-        if 'max_price' in group_data:
-            max_price = group_data['max_price']
-        print("min_price:", min_price)
-        print("max_price:", max_price)
 
-        liff_url = f"{gifts_url_base}/gifts?min_price={min_price}&max_price={max_price}"
+        liff_url = f"{gifts_url_base}"
+
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
     elif events.message.text.lower() == "ギフト設定":
         carousel_container = CarouselContainer(
@@ -313,7 +291,7 @@ def scheduled_task(schedule_id,timer_id):
     # current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
     # # 日時を文字列に変換
     # current_time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
-    liff_url = f"{question_url_base}/question?schedule_id={schedule_id}"
+    liff_url = f"{question_url_base}?schedule_id={schedule_id}"
     message = TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}")
     line_bot_api.push_message(group_id, messages=message)
     print("定期的な処理が実行されました")
