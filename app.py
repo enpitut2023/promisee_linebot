@@ -7,7 +7,7 @@ from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError
 )
 
-from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup, FlexSendMessage, BubbleContainer, TextComponent, BoxComponent, ButtonComponent, PostbackAction, DatetimePickerAction, MemberJoinedEvent
+from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup, FlexSendMessage, BubbleContainer, TextComponent, BoxComponent, ButtonComponent, PostbackAction, DatetimePickerAction, JoinEvent
 
 from linebot.models import CarouselContainer, FlexSendMessage, BubbleContainer, ImageComponent, BoxComponent, TextComponent, ButtonComponent, URIAction
 
@@ -38,7 +38,8 @@ line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
 timers = {}
-liff_url_base = "https://liff.line.me/2002096181-Ryql27BY"
+question_url_base = "https://liff.line.me/2002096181-Ryql27BY"
+gifts_url_base = "https://liff.line.me/2002640802-P70krL5V"
 
 # データベース使い方
 schedule_format = {
@@ -72,11 +73,11 @@ async def callback():
         abort(400)
     return 'OK'
 
-@handler.add(MemberJoinedEvent)
+@handler.add(JoinEvent)
 def handle_member_joined(event):
     # グループメンバーが参加したときの処理
     group_id = event.source.group_id
-    welcome_message = f"よろしくなのだ！予定の日時を登録したいときは「」と送るのだ！"
+    welcome_message = f"よろしくなのだ！予定の日時を登録したいときは「予定登録」と送るのだ！"
     
     line_bot_api.push_message(
         group_id,
@@ -97,7 +98,7 @@ def handle_message(events):
         current_time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
 
         # liff_urlに日時を埋め込む
-        liff_url = f"{liff_url_base}?group_id={group_id}/{current_time_str}"
+        liff_url = f"{question_url_base}/question?group_id={group_id}"
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}"))
 
     elif events.message.text.lower() == "予定登録":
@@ -131,7 +132,8 @@ def handle_message(events):
         )
     elif events.message.text.lower() == "テスト":
         group_id = events.source.group_id
-        liff_url = f"{liff_url_base}/gifts"
+
+        liff_url = f"{gifts_url_base}/gifts"
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
     elif events.message.text.lower() == "ギフト設定":
         carousel_container = CarouselContainer(
@@ -196,16 +198,7 @@ def handle_message(events):
             flex_message
         )
 
-@handler.add(MemberJoinedEvent)
-def handle_member_joined(event):
-    # グループメンバーが参加したときの処理
-    group_id = event.source.group_id
-    welcome_message = f"よろしくなのだ！予定の日時を登録したいときは「」と送るのだ！"
-    
-    line_bot_api.push_message(
-        group_id,
-        TextSendMessage(text=welcome_message)
-    )
+
 
 # 予定の保存処理
 @handler.add(PostbackEvent)
@@ -309,8 +302,8 @@ def scheduled_task(schedule_id,timer_id):
     # current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
     # # 日時を文字列に変換
     # current_time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
-    liff_url = f"間に合ったかアンケートを入力するのだ！！\n{liff_url_base}?schedule_id={schedule_id}"
-    message = TextSendMessage(text=f"{liff_url}")
+    liff_url = f"{question_url_base}/question?schedule_id={schedule_id}"
+    message = TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}")
     line_bot_api.push_message(group_id, messages=message)
     print("定期的な処理が実行されました")
     cancel_timer(timer_id,schedule_id)
