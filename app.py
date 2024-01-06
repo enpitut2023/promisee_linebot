@@ -120,7 +120,9 @@ def handle_message(events):
     elif events.message.text.lower() == "テスト":
         group_id = events.source.group_id
 
+
         liff_url = f"{gifts_url_base}"
+
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
     elif events.message.text.lower() == "ギフト設定":
         carousel_container = CarouselContainer(
