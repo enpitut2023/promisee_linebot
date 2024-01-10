@@ -345,6 +345,8 @@ def handle_postback(events):
 
         for gift in gifts_data:
             gift_dict = gift.to_dict()
+            print("gift")
+            print(gift_dict)
             if 1 <= gift_dict['price'] and gift_dict['price'] <= 100:
                 gift_list.append(gift_dict)
 
