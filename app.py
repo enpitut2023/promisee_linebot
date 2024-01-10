@@ -297,12 +297,12 @@ def run_schedule(time_schedules):
 # 時間になったら、実行する関数
 def scheduled_task(schedule_id,timer_id):
     group_id = schedules_doc_ref.document(schedule_id).get().to_dict()["group_id"]
-    # # urlの発行時間を埋め込む
-    # current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
-    # # 日時を文字列に変換
-    # current_time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
+    # urlの発行時間を埋め込む
+    current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
+    # 日時を文字列に変換
+    current_time_str = current_time.strftime("%H時%(M+7)分")
     liff_url = f"{question_url_base}?schedule_id={schedule_id}"
-    message = TextSendMessage(text=f"間に合ったかアンケートに回答するのだ!\n{liff_url}")
+    message = TextSendMessage(text=f"間に合ったか{current_time_str}までにアンケートに回答するのだ!\n{liff_url}")
     line_bot_api.push_message(group_id, messages=message)
     print("定期的な処理が実行されました")
     cancel_timer(timer_id,schedule_id)
