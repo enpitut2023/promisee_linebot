@@ -51,6 +51,12 @@ schedule_format = {
     "group_id": None,
 }
 
+format={
+    "username":[],
+    "answer":[],
+    "group_count":None,
+}
+
 
 # サービス アカウント キー ファイルへのパスを環境変数から取得
 firebase_admin_key_path = os.environ.get('FIREBASE_ADMIN_KEY_PATH')
@@ -78,6 +84,13 @@ async def callback():
 def handle_member_joined(event):
     # グループメンバーが参加したときの処理
     group_id = event.source.group_id
+    group_doc = group_doc_ref.document(group_id)
+    members_count = line_bot_api.get_group_members_count(group_id)
+
+    format['groupcount'] = members_count
+
+    group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
+    group_doc.set(format)
     welcome_message = f"よろしくなのだ！予定の日時を登録したいときは「予定登録」と送るのだ！"
     
     line_bot_api.push_message(
