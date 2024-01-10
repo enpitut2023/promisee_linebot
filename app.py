@@ -216,7 +216,10 @@ def handle_message(events):
         )
         line_bot_api.reply_message(
             events.reply_token,
-            flex_message
+            [
+                TextSendMessage(text="価格帯を選ぶのだ！"),
+                flex_message,
+            ]
         )
 
 
@@ -264,74 +267,74 @@ def handle_postback(events):
             messages
         )
 
-    if events.postback.data == 'gift_select':
-        liff_url = f"{gifts_url_base}"
-        line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
-    elif events.postback.data == 'gift_random':
-        carousel_container = CarouselContainer(
-            contents=[
-                BubbleContainer(
-                    size='micro',
-                    hero=ImageComponent(
-                        url="https://d.line-scdn.net/stf/line-mall/item-photo-7203592-34809838.jpg?63448310c83a48fde0877ceb6f5dd027",
-                        size="full",
-                        aspect_ratio="3:2",
-                        aspect_mode="cover",
-                        action=PostbackAction(label="View", data="1-100")
-                    ),
-                    body=BoxComponent(
-                        layout="vertical",
-                        contents=[
-                            TextComponent(text="~¥100", size="md", weight="bold", align="center"),
-                        ]
-                    )
-                ),
-                BubbleContainer(
-                    size='micro',
-                    hero=ImageComponent(
-                        url="https://d.line-scdn.net/stf/line-mall/item-photo-7051436-38009042.jpg?82b2f5e297660b191f058b866ea2def5",
-                        size="full",
-                        aspect_ratio="3:2",
-                        aspect_mode="cover",
-                        action=PostbackAction(label="View", data="101-300")
-                    ),
-                    body=BoxComponent(
-                        layout="vertical",
-                        contents=[
-                            TextComponent(text="¥101~¥300", size="md", weight="bold", align="center"),
-                        ]
-                    )
-                ),
-                BubbleContainer(
-                    size='micro',
-                    hero=ImageComponent(
-                        url="https://d.line-scdn.net/stf/line-mall/item-photo-3669558-38454203.jpg?aec4f17fafbd42bd31771b28b86b4d92",
-                        size="full",
-                        aspect_ratio="3:2",
-                        aspect_mode="cover",
-                        action=PostbackAction(label="View", data="301-500")
-                    ),
-                    body=BoxComponent(
-                        layout="vertical",
-                        contents=[
-                            TextComponent(text="¥301~¥500", size="md", weight="bold", align="center"),
-                        ]
-                    )
-                )
-            ]
-        )
+    # if events.postback.data == 'gift_select':
+    #     liff_url = f"{gifts_url_base}"
+    #     line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
+    # elif events.postback.data == 'gift_random':
+    #     carousel_container = CarouselContainer(
+    #         contents=[
+    #             BubbleContainer(
+    #                 size='micro',
+    #                 hero=ImageComponent(
+    #                     url="https://d.line-scdn.net/stf/line-mall/item-photo-7203592-34809838.jpg?63448310c83a48fde0877ceb6f5dd027",
+    #                     size="full",
+    #                     aspect_ratio="3:2",
+    #                     aspect_mode="cover",
+    #                     action=PostbackAction(label="View", data="1-100")
+    #                 ),
+    #                 body=BoxComponent(
+    #                     layout="vertical",
+    #                     contents=[
+    #                         TextComponent(text="~¥100", size="md", weight="bold", align="center"),
+    #                     ]
+    #                 )
+    #             ),
+    #             BubbleContainer(
+    #                 size='micro',
+    #                 hero=ImageComponent(
+    #                     url="https://d.line-scdn.net/stf/line-mall/item-photo-7051436-38009042.jpg?82b2f5e297660b191f058b866ea2def5",
+    #                     size="full",
+    #                     aspect_ratio="3:2",
+    #                     aspect_mode="cover",
+    #                     action=PostbackAction(label="View", data="101-300")
+    #                 ),
+    #                 body=BoxComponent(
+    #                     layout="vertical",
+    #                     contents=[
+    #                         TextComponent(text="¥101~¥300", size="md", weight="bold", align="center"),
+    #                     ]
+    #                 )
+    #             ),
+    #             BubbleContainer(
+    #                 size='micro',
+    #                 hero=ImageComponent(
+    #                     url="https://d.line-scdn.net/stf/line-mall/item-photo-3669558-38454203.jpg?aec4f17fafbd42bd31771b28b86b4d92",
+    #                     size="full",
+    #                     aspect_ratio="3:2",
+    #                     aspect_mode="cover",
+    #                     action=PostbackAction(label="View", data="301-500")
+    #                 ),
+    #                 body=BoxComponent(
+    #                     layout="vertical",
+    #                     contents=[
+    #                         TextComponent(text="¥301~¥500", size="md", weight="bold", align="center"),
+    #                     ]
+    #                 )
+    #             )
+    #         ]
+    #     )
 
-        flex_message = FlexSendMessage(
-            alt_text='Flex Message',
-            contents=carousel_container
-        )
-        line_bot_api.reply_message(
-            events.reply_token,
-            [
-                TextSendMessage(text="価格帯を選ぶのだ！"),
-                flex_message
-            ]
-        )
+    #     flex_message = FlexSendMessage(
+    #         alt_text='Flex Message',
+    #         contents=carousel_container
+    #     )
+    #     line_bot_api.reply_message(
+    #         events.reply_token,
+    #         [
+    #             TextSendMessage(text="価格帯を選ぶのだ！"),
+    #             flex_message
+    #         ]
+    #     )
 
     if events.postback.data == '1-100':
         group_id = events.source.group_id
@@ -345,19 +348,15 @@ def handle_postback(events):
 
         for gift in gifts_data:
             gift_dict = gift.to_dict()
-            print("gift")
-            print(gift_dict)
             if 1 <= gift_dict['price'] and gift_dict['price'] <= 100:
                 gift_list.append(gift_dict)
 
         gift = random.choices(gift_list)
-        print("gift_not_dict")
-        print(gift)
         group.update({
-            'name': gift['name'],
-            'price': gift['price'],
-            'gift_url': gift['gift_url'],
-            'image_url': gift['image_url']
+            'name': gift[0]['name'],
+            'price': gift[0]['price'],
+            'gift_url': gift[0]['gift_url'],
+            'image_url': gift[0]['image_url']
         })
 
         line_bot_api.reply_message(
