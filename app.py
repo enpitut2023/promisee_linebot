@@ -9,6 +9,9 @@ from linebot.exceptions import (
 
 from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup, FlexSendMessage, BubbleContainer, TextComponent, BoxComponent, ButtonComponent, PostbackAction, DatetimePickerAction, JoinEvent
 
+
+from linebot.models import TextSendMessage, QuickReply, QuickReplyButton, MessageAction
+
 from linebot.models import CarouselContainer, FlexSendMessage, BubbleContainer, ImageComponent, BoxComponent, TextComponent, ButtonComponent, URIAction
 
 from time import sleep
@@ -257,9 +260,16 @@ def handle_postback(events):
 
         # line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
 
+        quick_reply_buttons = QuickReply(
+            items=[
+                QuickReplyButton(action=MessageAction(label="ボタン1", text="メッセージ1")),
+                QuickReplyButton(action=MessageAction(label="ボタン2", text="メッセージ2"))
+            ]
+        )
+
         messages = [
             TextSendMessage(text=f"{formatted_datetime}に予定が登録されたのだ！"), 
-            TextSendMessage(text=f"次に遅刻したときに送るギフトを設定するのだ！\n{liff_url}")
+            TextSendMessage(text='クイックリプライを選んでください:', quick_reply=quick_reply_buttons)
         ]
 
         # ユーザーに対して応答メッセージを送信
