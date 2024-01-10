@@ -134,6 +134,8 @@ def handle_message(events):
         liff_url = f"{gifts_url_base}?min_price={min_price}&max_price={max_price}"
 
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
+
+        
     elif events.message.text.lower() == "ギフト設定":
         carousel_container = CarouselContainer(
             contents=[
@@ -305,31 +307,42 @@ def scheduled_task(schedule_id,timer_id):
     message = TextSendMessage(text=f"間に合ったか{current_time_str}までにアンケートに回答するのだ!\n{liff_url}")
     line_bot_api.push_message(group_id, messages=message)
     print("定期的な処理が実行されました")
-    cancel_timer(timer_id,schedule_id)
+    cancel_timer(timer_id)
+
+    # 7分後にタイマーを設定してイベントをスケジュール
+    timer_id = str(uuid.uuid4()) 
+    delay_7 = 7 * 60
+    # タイマーを設定してイベントをスケジュール
+    timer = threading.Timer(delay_7, delete_schedule, args=(schedule_id, timer_id))
+    timer.start()
 
 
 
-def cancel_timer(timer_id, schedule_id):
+def cancel_timer(timer_id):
     if timer_id in timers:
         # タイマーが存在すればキャンセル
         timer = timers[timer_id]
         timer.cancel()
 
-# # タイマーキャンセルと同時にスケジュールもdbから消去
-# def delete_schedule(schedule_id):
-#     try:
-#         # 指定されたドキュメントIDに基づいてドキュメントを取得
-#         schedule_delete = schedules_doc_ref.document(schedule_id)
+# スケジュールもdbから消去
+def delete_schedule(schedule_id, timer_id):
+    try:
+        # 指定されたドキュメントIDに基づいてドキュメントを取得
+        schedule_delete = schedules_doc_ref.document(schedule_id)
         
-#         # ドキュメントが存在するか確認
-#         if schedule_delete.get().exists:
-#             # ドキュメントを削除
-#             schedule_delete.delete()
-#             print(f"スケジュール {schedule_id} が削除されました。")
-#         else:
-#             print(f"スケジュール {schedule_id} は存在しません。")
-#     except Exception as e:
-#         print(f"スケジュールの削除中にエラーが発生しました: {e}")
+        # ドキュメントが存在するか確認
+        if schedule_delete.get().exists:
+            message = TextSendMessage(text="https://gift.line.me/item/6517019")
+            group_id = schedules_doc_ref.document(schedule_id).get().to_dict()["group_id"]
+            line_bot_api.push_message(group_id, messages=message)          
+            # ドキュメントを削除
+            schedule_delete.delete()
+            cancel_timer(timer_id)
+            print(f"スケジュール {schedule_id} が削除されました。")
+        else:
+            print(f"スケジュール {schedule_id} は存在しません。")
+    except Exception as e:
+        print(f"スケジュールの削除中にエラーが発生しました: {e}")
 
 
 
