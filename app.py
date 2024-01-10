@@ -226,7 +226,11 @@ def handle_postback(events):
 
         # ギフト一覧
         group_doc = db.collection('groups').document(group_id).get()
+        print("group_doc")
+        print(group_doc)
         group_data = group_doc.to_dict()
+        print("group_data")
+        print(group_data)
         min_price = 0
         max_price = 1000
 
