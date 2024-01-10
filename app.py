@@ -255,7 +255,7 @@ def handle_postback(events):
         print("max_price:", max_price)
         liff_url = f"{gifts_url_base}?min_price={min_price}&max_price={max_price}"
 
-        line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
+        # line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
 
         messages = [
             TextSendMessage(text=f"{formatted_datetime}に予定が登録されたのだ！"), 
