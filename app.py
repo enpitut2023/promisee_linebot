@@ -265,28 +265,27 @@ def handle_postback(events):
 
         # line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
 
-        # quick_reply_buttons = QuickReply(
-        #     items=[
-        #         QuickReplyButton(action=MessageAction(label="ギフト一覧から選ぶ", text="ギフト設定:一覧")),
-        #         QuickReplyButton(action=MessageAction(label="ランダム", text="ギフト設定:ランダム"))
-        #     ]
-        # )
-
-        buttons_template_message = TemplateSendMessage(
-            alt_text='質問1',
-            template=ButtonsTemplate(
-                title='質問2',
-                text='次に遅刻したときに送るギフトを設定するのだ！',
-                actions=[
-                    PostbackAction(label='自分で選ぶ', data='action=gift_select'),
-                    PostbackAction(label='ランダム', data='action=gift_random')
-                ]
-            )
+        quick_reply_buttons = QuickReply(
+            items=[
+                QuickReplyButton(action=MessageAction(label="ギフト一覧から選ぶ", text="ギフト設定:一覧")),
+                QuickReplyButton(action=MessageAction(label="ランダム", text="ギフト設定:ランダム"))
+            ]
         )
+
+        # buttons_template_message = TemplateSendMessage(
+        #     template=ButtonsTemplate(
+        #         title='質問2',
+        #         text='次に遅刻したときに送るギフトを設定するのだ！',
+        #         actions=[
+        #             PostbackAction(label='自分で選ぶ', data='gift_select'),
+        #             PostbackAction(label='ランダム', data='gift_random')
+        #         ]
+        #     )
+        # )
 
         messages = [
             TextSendMessage(text=f"{formatted_datetime}に予定が登録されたのだ！"), 
-            buttons_template_message
+            TextSendMessage(text='次に遅刻したときに送るギフトを設定するのだ！', quick_reply=quick_reply_buttons)
         ]
 
         # ユーザーに対して応答メッセージを送信
