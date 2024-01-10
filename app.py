@@ -248,6 +248,7 @@ def handle_postback(events):
         # ユーザーに対して応答メッセージを送信
         line_bot_api.reply_message(
             events.reply_token,
+            messages
         )
 
     if events.postback.data == '1-100':
