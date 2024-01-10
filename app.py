@@ -224,11 +224,32 @@ def handle_postback(events):
         schedule_format['group_id'] = group_id
         schedules_doc.set(schedule_format)
 
+        # ギフト一覧
+        group_doc = db.collection('groups').document(group_id).get()
+        group_data = group_doc.to_dict()
+        min_price = 0
+        max_price = 1000
+
+        if 'min_price' in group_data:
+            min_price = group_data['min_price']
+        if 'max_price' in group_data:
+            max_price = group_data['max_price']
+        print("min_price:", min_price)
+        print("max_price:", max_price)
+        liff_url = f"{gifts_url_base}?min_price={min_price}&max_price={max_price}"
+
+        line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
+
+        messages = [
+            TextSendMessage(text=f"{formatted_datetime}に予定が登録されたのだ！"), 
+            TextSendMessage(text=f"次に遅刻したときに送るギフトを設定するのだ！\n{liff_url}")
+        ]
+
         # ユーザーに対して応答メッセージを送信
         line_bot_api.reply_message(
             events.reply_token,
-            TextSendMessage(text=f"{formatted_datetime}に予定が登録されたのだ！")
         )
+
     if events.postback.data == '1-100':
         group_id = events.source.group_id
         group = db.collection('groups').document(group_id)
