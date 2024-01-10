@@ -8,6 +8,7 @@ from linebot.exceptions import (
 )
 
 from linebot.models import MessageEvent, TextMessage, ConfirmTemplate, TemplateSendMessage, PostbackAction, TextSendMessage, PostbackEvent, SourceGroup, FlexSendMessage, BubbleContainer, TextComponent, BoxComponent, ButtonComponent, PostbackAction, DatetimePickerAction, JoinEvent
+from linebot.models import TemplateSendMessage, ButtonsTemplate, PostbackAction
 
 
 from linebot.models import TextSendMessage, QuickReply, QuickReplyButton, MessageAction
@@ -150,7 +151,11 @@ def handle_message(events):
         liff_url = f"{gifts_url_base}?min_price={min_price}&max_price={max_price}"
 
         line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
-    elif events.message.text.lower() == "ギフト設定":
+    elif events.message.text.lower() == "ギフト設定:一覧":
+        liff_url = f"{gifts_url_base}"
+        line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
+
+    elif events.message.text.lower() == "ギフト設定:ランダム":
         carousel_container = CarouselContainer(
             contents=[
                 BubbleContainer(
@@ -260,22 +265,100 @@ def handle_postback(events):
 
         # line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
 
-        quick_reply_buttons = QuickReply(
-            items=[
-                QuickReplyButton(action=MessageAction(label="ボタン1", text="メッセージ1")),
-                QuickReplyButton(action=MessageAction(label="ボタン2", text="メッセージ2"))
-            ]
+        # quick_reply_buttons = QuickReply(
+        #     items=[
+        #         QuickReplyButton(action=MessageAction(label="ギフト一覧から選ぶ", text="ギフト設定:一覧")),
+        #         QuickReplyButton(action=MessageAction(label="ランダム", text="ギフト設定:ランダム"))
+        #     ]
+        # )
+
+        buttons_template_message = TemplateSendMessage(
+            alt_text='質問1',
+            template=ButtonsTemplate(
+                title='質問2',
+                text='次に遅刻したときに送るギフトを設定するのだ！',
+                actions=[
+                    PostbackAction(label='自分で選ぶ', data='action=gift_select'),
+                    PostbackAction(label='ランダム', data='action=gift_random')
+                ]
+            )
         )
 
         messages = [
             TextSendMessage(text=f"{formatted_datetime}に予定が登録されたのだ！"), 
-            TextSendMessage(text='クイックリプライを選んでください:', quick_reply=quick_reply_buttons)
+            buttons_template_message
         ]
 
         # ユーザーに対して応答メッセージを送信
         line_bot_api.reply_message(
             events.reply_token,
             messages
+        )
+
+    if events.postback.data == 'gift_select':
+        liff_url = f"{gifts_url_base}"
+        line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
+    elif events.postback.data == 'gift_random':
+        carousel_container = CarouselContainer(
+            contents=[
+                BubbleContainer(
+                    size='micro',
+                    hero=ImageComponent(
+                        url="https://d.line-scdn.net/stf/line-mall/item-photo-7203592-34809838.jpg?63448310c83a48fde0877ceb6f5dd027",
+                        size="full",
+                        aspect_ratio="3:2",
+                        aspect_mode="cover",
+                        action=PostbackAction(label="View", data="1-100")
+                    ),
+                    body=BoxComponent(
+                        layout="vertical",
+                        contents=[
+                            TextComponent(text="~¥100", size="md", weight="bold", align="center"),
+                        ]
+                    )
+                ),
+                BubbleContainer(
+                    size='micro',
+                    hero=ImageComponent(
+                        url="https://d.line-scdn.net/stf/line-mall/item-photo-7051436-38009042.jpg?82b2f5e297660b191f058b866ea2def5",
+                        size="full",
+                        aspect_ratio="3:2",
+                        aspect_mode="cover",
+                        action=PostbackAction(label="View", data="101-300")
+                    ),
+                    body=BoxComponent(
+                        layout="vertical",
+                        contents=[
+                            TextComponent(text="¥101~¥300", size="md", weight="bold", align="center"),
+                        ]
+                    )
+                ),
+                BubbleContainer(
+                    size='micro',
+                    hero=ImageComponent(
+                        url="https://d.line-scdn.net/stf/line-mall/item-photo-3669558-38454203.jpg?aec4f17fafbd42bd31771b28b86b4d92",
+                        size="full",
+                        aspect_ratio="3:2",
+                        aspect_mode="cover",
+                        action=PostbackAction(label="View", data="301-500")
+                    ),
+                    body=BoxComponent(
+                        layout="vertical",
+                        contents=[
+                            TextComponent(text="¥301~¥500", size="md", weight="bold", align="center"),
+                        ]
+                    )
+                )
+            ]
+        )
+
+        flex_message = FlexSendMessage(
+            alt_text='Flex Message',
+            contents=carousel_container
+        )
+        line_bot_api.reply_message(
+            events.reply_token,
+            flex_message
         )
 
     if events.postback.data == '1-100':
