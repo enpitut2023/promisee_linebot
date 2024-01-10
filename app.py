@@ -18,6 +18,7 @@ from linebot.models import CarouselContainer, FlexSendMessage, BubbleContainer, 
 from time import sleep
 
 import time
+import random
 import os
 import dotenv
 import requests
@@ -245,43 +246,12 @@ def handle_postback(events):
         schedule_format['group_id'] = group_id
         schedules_doc.set(schedule_format)
 
-        # ギフト一覧
-        group_doc = db.collection('groups').document(group_id).get()
-        print("group_doc")
-        print(group_doc)
-        group_data = group_doc.to_dict()
-        print("group_data")
-        print(group_data)
-        min_price = 0
-        max_price = 1000
-
-        if 'min_price' in group_data:
-            min_price = group_data['min_price']
-        if 'max_price' in group_data:
-            max_price = group_data['max_price']
-        print("min_price:", min_price)
-        print("max_price:", max_price)
-        liff_url = f"{gifts_url_base}?min_price={min_price}&max_price={max_price}"
-
-        # line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
-
         quick_reply_buttons = QuickReply(
             items=[
                 QuickReplyButton(action=MessageAction(label="ギフト一覧から選ぶ", text="ギフト設定:一覧")),
                 QuickReplyButton(action=MessageAction(label="ランダム", text="ギフト設定:ランダム"))
             ]
         )
-
-        # buttons_template_message = TemplateSendMessage(
-        #     template=ButtonsTemplate(
-        #         title='質問2',
-        #         text='次に遅刻したときに送るギフトを設定するのだ！',
-        #         actions=[
-        #             PostbackAction(label='自分で選ぶ', data='gift_select'),
-        #             PostbackAction(label='ランダム', data='gift_random')
-        #         ]
-        #     )
-        # )
 
         messages = [
             TextSendMessage(text=f"{formatted_datetime}に予定が登録されたのだ！"), 
@@ -357,7 +327,10 @@ def handle_postback(events):
         )
         line_bot_api.reply_message(
             events.reply_token,
-            flex_message
+            [
+                TextSendMessage(text="価格帯を選ぶのだ！"),
+                flex_message
+            ]
         )
 
     if events.postback.data == '1-100':
@@ -367,11 +340,30 @@ def handle_postback(events):
             'min_price': 1,
             'max_price': 100
         })
+        gifts_data = db.collection('gifts').get()
+        gift_list = []
+
+        for gift in gifts_data:
+            gift_dict = gift.to_dict()
+            if 1 <= gift_dict['price'] and gift_dict['price'] <= 100:
+                gift_list.append(gift_dict)
+
+        gift = random.choices(gift_list)
+        group.update({
+            'name': gift['name'],
+            'price': gift['price'],
+            'gift_url': gift['gift_url'],
+            'image_url': gift['image_url']
+        })
 
         line_bot_api.reply_message(
             events.reply_token,
-            TextSendMessage(text="ギフトの値段が~¥100に設定されたのだ！")
+            [
+                TextSendMessage(text="ギフトが設定されたのだ！"),
+                TextSendMessage(text="みんな遅刻しないように努めるのだ〜")
+            ]
         )
+
     elif events.postback.data == '101-300':
         group_id = events.source.group_id
         group = db.collection('groups').document(group_id)
