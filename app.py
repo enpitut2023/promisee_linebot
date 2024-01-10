@@ -351,6 +351,8 @@ def handle_postback(events):
                 gift_list.append(gift_dict)
 
         gift = random.choices(gift_list)
+        print("gift_not_dict")
+        print(gift)
         group.update({
             'name': gift['name'],
             'price': gift['price'],
