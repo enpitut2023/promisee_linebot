@@ -13,6 +13,13 @@ from linebot.models import CarouselContainer, FlexSendMessage, BubbleContainer, 
 
 from time import sleep
 
+from linebot.models import (
+    TextSendMessage,
+    QuickReply,
+    QuickReplyButton,
+    PostbackAction,
+)
+
 import time
 import os
 import dotenv
@@ -202,15 +209,32 @@ def handle_message(events):
                 )
             ]
         )
+        if events.message.text.lower() == "人数登録":
+            # 数量選択器を含むQuick Replyボタンを作成
+            quantity_selector_button = QuickReplyButton(
+                action=PostbackAction(
+                    label="人数登録",
+                    data="quantity_selection",  # ボタンを識別するためのPostbackデータ
+                )
+            )
 
-        flex_message = FlexSendMessage(
-            alt_text='Flex Message',
-            contents=carousel_container
-        )
-        line_bot_api.reply_message(
-            events.reply_token,
-            flex_message
-        )
+            # 数量選択器ボタンを含むQuick Replyオブジェクトを作成
+            quantity_selector_reply = QuickReply(items=[quantity_selector_button])
+
+            # Quick Replyを含むテキストメッセージを作成
+            text_message = TextSendMessage(text="人数が登録されたのだ！:", quick_reply=quantity_selector_reply)
+
+            # テキストメッセージを送信
+            line_bot_api.reply_message(events.reply_token, text_message)
+
+            flex_message = FlexSendMessage(
+                alt_text='Flex Message',
+                contents=carousel_container
+            )
+            line_bot_api.reply_message(
+                events.reply_token,
+                flex_message
+            )
 
 
 
@@ -219,9 +243,9 @@ def handle_message(events):
 def handle_postback(events):
     if events.postback.data == 'datetime_postback':
 
-        group_id = events.source.group_id
-        group_count = line_bot_api.get_group_members_count(group_id)
-        schedule_format['group_count'] = group_count #group_countをschedule_formatに追加
+        # group_id = events.source.group_id
+        # group_count = events.postback.params['group_count']
+        # schedule_format['group_count'] = group_count #group_countをschedule_formatに追加
 
         # 日時選択のPostbackデータを受け取った場合
         selected_iso_datetime = events.postback.params['datetime']  # ISO 8601 形式の日時文字列
@@ -280,6 +304,18 @@ def handle_postback(events):
             events.reply_token,
             TextSendMessage(text="ギフトの値段が¥301~¥500に設定されたのだ！")
         )
+    
+    elif events.postback.data == 'quantity_selection':
+        group_id = events.source.group_id
+
+        #選択した数値がgroup_countに入ってるかどうか怪しい
+        group_count = events.postback.params['quantity_selection']
+
+        #db　group_countの値更新
+        schedules_doc = schedules_doc_ref.document(group_id)
+        schedules_doc.update({
+            'group_count': group_count,
+        }) 
 
 
 # 定期実行により叩かれるAPI
