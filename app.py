@@ -137,6 +137,7 @@ def handle_message(events):
             events.reply_token,
             flex_message
         )
+
     elif events.message.text.lower() == "テスト":
         group_id = events.source.group_id
         group_doc = db.collection('groups').document(group_id).get()
@@ -209,32 +210,32 @@ def handle_message(events):
                 )
             ]
         )
-        if events.message.text.lower() == "人数登録":
+
+        flex_message = FlexSendMessage(
+            alt_text='Flex Message',
+            contents=carousel_container
+        )
+        line_bot_api.reply_message(
+            events.reply_token,
+            flex_message
+        )
+
+    elif events.message.text.lower() == "人数登録":
             # 数量選択器を含むQuick Replyボタンを作成
-            quantity_selector_button = QuickReplyButton(
-                action=PostbackAction(
-                    label="人数登録",
-                    data="quantity_selection",  # ボタンを識別するためのPostbackデータ
-                )
+        quantity_selector_button = QuickReplyButton(
+            action=PostbackAction(
+                label="人数登録",
+                data="quantity_selection",  # ボタンを識別するためのPostbackデータ
             )
+        )
 
-            # 数量選択器ボタンを含むQuick Replyオブジェクトを作成
-            quantity_selector_reply = QuickReply(items=[quantity_selector_button])
+        # 数量選択器ボタンを含むQuick Replyオブジェクトを作成
+        quantity_selector_reply = QuickReply(items=[quantity_selector_button])
 
-            # Quick Replyを含むテキストメッセージを作成
-            text_message = TextSendMessage(text="人数が登録されたのだ！:", quick_reply=quantity_selector_reply)
-
-            # テキストメッセージを送信
-            line_bot_api.reply_message(events.reply_token, text_message)
-
-            flex_message = FlexSendMessage(
-                alt_text='Flex Message',
-                contents=carousel_container
-            )
-            line_bot_api.reply_message(
-                events.reply_token,
-                flex_message
-            )
+        # Quick Replyを含むテキストメッセージとFlex Messageを作成
+        text_message = TextSendMessage(text="人数が登録されたのだ！:", quick_reply=quantity_selector_reply)
+        # テキストメッセージを送信
+        line_bot_api.reply_message(events.reply_token, text_message)
 
 
 
@@ -351,9 +352,10 @@ def scheduled_task(schedule_id,timer_id):
     # urlの発行時間を埋め込む
     current_time = datetime.now(pytz.timezone('Asia/Tokyo'))
     # 日時を文字列に変換
-    current_time_str = current_time.strftime("%H時%(M+7)分")
+    desired_time_str = (current_time + timedelta(minutes=7)).strftime("%H時%M分")
+
     liff_url = f"{question_url_base}?schedule_id={schedule_id}"
-    message = TextSendMessage(text=f"間に合ったか{current_time_str}までにアンケートに回答するのだ!\n{liff_url}")
+    message = TextSendMessage(text=f"間に合ったか{desired_time_str}までにアンケートに回答するのだ!\n{liff_url}")
     line_bot_api.push_message(group_id, messages=message)
     print("定期的な処理が実行されました")
     cancel_timer(timer_id)
