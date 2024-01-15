@@ -48,6 +48,8 @@ timers = {}
 question_url_base = "https://liff.line.me/2002096181-Ryql27BY"
 gifts_url_base = "https://liff.line.me/2002642249-Lq0RX2ZN"
 
+# ユーザー状態を保存
+user_states = {}
 
 # データベース使い方
 schedule_format = {
@@ -221,22 +223,28 @@ def handle_message(events):
         )
 
     elif events.message.text.lower() == "人数登録":
-            # 数量選択器を含むQuick Replyボタンを作成
-        quantity_selector_button = QuickReplyButton(
-            action=PostbackAction(
-                label="人数登録",
-                data="quantity_selection",  # ボタンを識別するためのPostbackデータ
-            )
+        # ユーザー状態を「人数入力待ち」にする
+        user_states[events.source.user_id] = "waiting_for_num"
+        # ユーザーにメッセージを送信
+        line_bot_api.reply_message(
+            events.reply_token,
+            TextSendMessage(text="参加人数を入力してください")
         )
 
-        # 数量選択器ボタンを含むQuick Replyオブジェクトを作成
-        quantity_selector_reply = QuickReply(items=[quantity_selector_button])
-
-        # Quick Replyを含むテキストメッセージとFlex Messageを作成
-        text_message = TextSendMessage(text="人数が登録されたのだ！:", quick_reply=quantity_selector_reply)
-        # テキストメッセージを送信
-        line_bot_api.reply_message(events.reply_token, text_message)
-
+    # 入力人数の処理（ユーザー状態が"waiting_for_num"の場合のみ）
+    elif events.message.text.isdigit() and user_states.get(events.source.user_id) == "waiting_for_num":
+        # グループIDの取得
+        group_id = events.source.group_id
+        # データをデータベースに保存
+        num_of_people = int(events.message.text)
+        db.collection('groups').document(group_id).update({'num_of_people': num_of_people})
+        # 「登録した」メッセージを送信
+        line_bot_api.reply_message(
+            events.reply_token,
+            TextSendMessage(text="予定人数を登録した！")
+        )
+        # ユーザー状態をクリア
+        del user_states[events.source.user_id]
 
 
 # 予定の保存処理
