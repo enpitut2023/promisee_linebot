@@ -166,10 +166,26 @@ def handle_message(events):
         else:
             messages = []
             for data in datas:
-                message = TextSendMessage(text=f"約束の時間は{data['datetime']}\n人数は{data['num_of_people']}人\n送るギフトの価格帯は¥{data['min_price']}~¥{data['max_price']}なのだ！")
-                messages.append(message)
+                # Flex Messageを使用
+                flex_message = FlexSendMessage(
+                    alt_text='予定の詳細',
+                    contents=BubbleContainer(
+                        body=BoxComponent(
+                            layout='vertical',
+                            contents=[
+                                TextComponent(text=f"約束の時間は", size='md'),
+                                TextComponent(text=f"{data['datetime']}", size='lg', weight='bold'),
+                                TextComponent(text=f"人数は", size='md'),
+                                TextComponent(text=f"{data['num_of_people']}人", size='lg', weight='bold'),
+                                TextComponent(text=f"送るギフトの価格帯は", size='md'),
+                                TextComponent(text=f"¥{data['min_price']}~¥{data['max_price']}", size='lg', weight='bold')
+                            ]
+                        )
+                    )
+                )
+                messages.append(flex_message)
 
-            # 一度に複数のメッセージを送信
+            # 一度に複数のFlex Messageを送信
             line_bot_api.reply_message(events.reply_token, messages)
 
 
@@ -574,5 +590,4 @@ if __name__ == "__main__":
     # Flaskアプリケーションを実行するスレッド
     flask_app_thread = threading.Thread(target=start_flask_app)
     flask_app_thread.start()
-
-
+    app.run(host="localhost", port=8000)
