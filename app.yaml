@@ -4,8 +4,8 @@ service: default
 entrypoint: gunicorn app:app
 
 env_variables:
-  CHANNEL_ACCESS_TOKEN : "Z1Azp+0SWGbiZDlKrmFeqUQCdFK0GsYguAx5IZxLF8kQKhaEiH15U6NKglY6lrqsdi0CmjtrrROj/WrZHqvnxaK57e0+UxSxfxeKPeQe3DiLZQyNUNoh8vU672Uixibk+hJdDl8fOcFx9StvDs1jBgdB04t89/1O/w1cDnyilFU="
-  CHANNEL_SECRET : "d2451ec1d86379bc572a48672c77a929"
+  CHANNEL_ACCESS_TOKEN : "wSdpCAD2N4wUrjg5vbXhmlMN0eXqq6kRZ+7oWBDPwwgStk/fVPqtcEmhcKQfhW9ubvfV21WYvNGiaQwJv+opfMbMa9HbhYCe6DuSLwePegsLJ0vkS43p3JuRh7jGUPGy7jeVR75y2u8cqwnUi2JzbAdB04t89/1O/w1cDnyilFU="
+  CHANNEL_SECRET : "40f4f98e4805a89e13f27f5a0a499f54"
   FIREBASE_ADMIN_KEY_PATH: 'key.json'
 
 automatic_scaling:
