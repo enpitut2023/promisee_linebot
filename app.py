@@ -103,7 +103,7 @@ def handle_member_joined(event):
 
     group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
     group_doc.set(format)
-    welcome_message = f"よろしくなのだ！予定の日時を登録したいときは「予定登録」と送るのだ！"
+    welcome_message = f"よろしくなのだ！予定の日時を登録したいときは「予定登録」と送るのだ！\n登録した予定を確認したいときは「予定確認」と送るのだ！"
     
     line_bot_api.push_message(
         group_id,
