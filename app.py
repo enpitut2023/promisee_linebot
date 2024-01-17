@@ -99,7 +99,7 @@ def handle_member_joined(event):
     group_doc = group_doc_ref.document(group_id)
     members_count = line_bot_api.get_group_members_count(group_id)
 
-    format['groupcount'] = members_count
+    format['group_count'] = members_count
 
     group_doc = group_doc_ref.document(group_id) #ドキュメントを生成
     group_doc.set(format)
@@ -143,96 +143,126 @@ def handle_message(events):
             flex_message
         )
 
-    elif events.message.text.lower() == "テスト":
+    elif events.message.text.lower() == "予定確認":
         group_id = events.source.group_id
-        group_doc = db.collection('groups').document(group_id).get()
-        group_data = group_doc.to_dict()
-        min_price = 0
-        max_price = 1000
+        query = schedules_doc_ref.where('group_id', '==', group_id)
 
-        if 'min_price' in group_data:
-            min_price = group_data['min_price']
-        if 'max_price' in group_data:
-            max_price = group_data['max_price']
-        print("min_price:", min_price)
-        print("max_price:", max_price)
+        # クエリを実行してデータを取得
+        docs = query.stream()
 
-        liff_url = f"{gifts_url_base}?min_price={min_price}&max_price={max_price}"
+        # データをリストに格納
+        datas= []
+        
+        for doc in docs:
+            datas.append(doc.to_dict())
 
-        line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
+        # 条件に一致するドキュメントがない場合は空のリストを返す
+        if not datas:
+            line_bot_api.reply_message(
+                events.reply_token,
+                TextSendMessage(text="予定が登録されていないのだ！")
+            )
+        
+        else:
+            messages = []
+            for data in datas:
+                message = TextSendMessage(text=f"約束の時間は{data['datetime']}\n人数は{data['num_of_people']}人\n送るギフトの価格帯は¥{data['min_price']}~¥{data['max_price']}なのだ！")
+                messages.append(message)
+
+            # 一度に複数のメッセージを送信
+            line_bot_api.reply_message(events.reply_token, messages)
+
+
+    # elif events.message.text.lower() == "テスト":
+    #     group_id = events.source.group_id
+    #     group_doc = db.collection('groups').document(group_id).get()
+    #     group_data = group_doc.to_dict()
+    #     min_price = 0
+    #     max_price = 1000
+
+    #     if 'min_price' in group_data:
+    #         min_price = group_data['min_price']
+    #     if 'max_price' in group_data:
+    #         max_price = group_data['max_price']
+    #     print("min_price:", min_price)
+    #     print("max_price:", max_price)
+
+    #     liff_url = f"{gifts_url_base}?min_price={min_price}&max_price={max_price}"
+
+    #     line_bot_api.reply_message(events.reply_token, TextSendMessage(text=f"ギフト一覧なのだ！\n{liff_url}"))
 
         
-    elif events.message.text.lower() == "ギフト設定":
-        carousel_container = CarouselContainer(
-            contents=[
-                BubbleContainer(
-                    size='micro',
-                    hero=ImageComponent(
-                        url="https://d.line-scdn.net/stf/line-mall/item-photo-7203592-34809838.jpg?63448310c83a48fde0877ceb6f5dd027",
-                        size="full",
-                        aspect_ratio="3:2",
-                        aspect_mode="cover",
-                        action=PostbackAction(label="View", data="1-100")
-                    ),
-                    body=BoxComponent(
-                        layout="vertical",
-                        contents=[
-                            TextComponent(text="~¥100", size="md", weight="bold", align="center"),
-                        ]
-                    )
-                ),
-                BubbleContainer(
-                    size='micro',
-                    hero=ImageComponent(
-                        url="https://d.line-scdn.net/stf/line-mall/item-photo-7051436-38009042.jpg?82b2f5e297660b191f058b866ea2def5",
-                        size="full",
-                        aspect_ratio="3:2",
-                        aspect_mode="cover",
-                        action=PostbackAction(label="View", data="101-300")
-                    ),
-                    body=BoxComponent(
-                        layout="vertical",
-                        contents=[
-                            TextComponent(text="¥101~¥300", size="md", weight="bold", align="center"),
-                        ]
-                    )
-                ),
-                BubbleContainer(
-                    size='micro',
-                    hero=ImageComponent(
-                        url="https://d.line-scdn.net/stf/line-mall/item-photo-3669558-38454203.jpg?aec4f17fafbd42bd31771b28b86b4d92",
-                        size="full",
-                        aspect_ratio="3:2",
-                        aspect_mode="cover",
-                        action=PostbackAction(label="View", data="301-500")
-                    ),
-                    body=BoxComponent(
-                        layout="vertical",
-                        contents=[
-                            TextComponent(text="¥301~¥500", size="md", weight="bold", align="center"),
-                        ]
-                    )
-                )
-            ]
-        )
+    # elif events.message.text.lower() == "ギフト設定":
+    #     carousel_container = CarouselContainer(
+    #         contents=[
+    #             BubbleContainer(
+    #                 size='micro',
+    #                 hero=ImageComponent(
+    #                     url="https://d.line-scdn.net/stf/line-mall/item-photo-7203592-34809838.jpg?63448310c83a48fde0877ceb6f5dd027",
+    #                     size="full",
+    #                     aspect_ratio="3:2",
+    #                     aspect_mode="cover",
+    #                     action=PostbackAction(label="View", data="1-100")
+    #                 ),
+    #                 body=BoxComponent(
+    #                     layout="vertical",
+    #                     contents=[
+    #                         TextComponent(text="~¥100", size="md", weight="bold", align="center"),
+    #                     ]
+    #                 )
+    #             ),
+    #             BubbleContainer(
+    #                 size='micro',
+    #                 hero=ImageComponent(
+    #                     url="https://d.line-scdn.net/stf/line-mall/item-photo-7051436-38009042.jpg?82b2f5e297660b191f058b866ea2def5",
+    #                     size="full",
+    #                     aspect_ratio="3:2",
+    #                     aspect_mode="cover",
+    #                     action=PostbackAction(label="View", data="101-300")
+    #                 ),
+    #                 body=BoxComponent(
+    #                     layout="vertical",
+    #                     contents=[
+    #                         TextComponent(text="¥101~¥300", size="md", weight="bold", align="center"),
+    #                     ]
+    #                 )
+    #             ),
+    #             BubbleContainer(
+    #                 size='micro',
+    #                 hero=ImageComponent(
+    #                     url="https://d.line-scdn.net/stf/line-mall/item-photo-3669558-38454203.jpg?aec4f17fafbd42bd31771b28b86b4d92",
+    #                     size="full",
+    #                     aspect_ratio="3:2",
+    #                     aspect_mode="cover",
+    #                     action=PostbackAction(label="View", data="301-500")
+    #                 ),
+    #                 body=BoxComponent(
+    #                     layout="vertical",
+    #                     contents=[
+    #                         TextComponent(text="¥301~¥500", size="md", weight="bold", align="center"),
+    #                     ]
+    #                 )
+    #             )
+    #         ]
+    #     )
 
-        flex_message = FlexSendMessage(
-            alt_text='Flex Message',
-            contents=carousel_container
-        )
-        line_bot_api.reply_message(
-            events.reply_token,
-            flex_message
-        )
+    #     flex_message = FlexSendMessage(
+    #         alt_text='Flex Message',
+    #         contents=carousel_container
+    #     )
+    #     line_bot_api.reply_message(
+    #         events.reply_token,
+    #         flex_message
+    #     )
 
-    elif events.message.text.lower() == "人数登録":
-        # ユーザー状態を「人数入力待ち」にする
-        user_states[events.source.user_id] = "waiting_for_num"
-        # ユーザーにメッセージを送信
-        line_bot_api.reply_message(
-            events.reply_token,
-            TextSendMessage(text="参加人数を入力してください")
-        )
+    # elif events.message.text.lower() == "人数登録":
+    #     # ユーザー状態を「人数入力待ち」にする
+    #     user_states[events.source.user_id] = "waiting_for_num"
+    #     # ユーザーにメッセージを送信
+    #     line_bot_api.reply_message(
+    #         events.reply_token,
+    #         TextSendMessage(text="参加人数を入力してください")
+    #     )
 
     # 入力人数の処理（ユーザー状態が"waiting_for_num"の場合のみ）
     elif events.message.text.isdigit() and user_states.get(events.source.user_id) == "waiting_for_num":
@@ -374,6 +404,7 @@ def handle_postback(events):
         group = db.collection('groups').document(group_id)
         schedule_id = group.get().to_dict()["schedule_id"]
         schedules_doc = schedules_doc_ref.document(schedule_id)
+        schedule_data = schedules_doc.get().to_dict()
         
         schedules_doc.update({
             'min_price': 1,
@@ -384,7 +415,7 @@ def handle_postback(events):
             events.reply_token,
             [
                 TextSendMessage(text="ギフトの値段が~¥100に設定されたのだ！"),
-                TextSendMessage(text="これで予定登録完了なのだ！")
+                TextSendMessage(text=f"約束の時間は{schedule_data['datetime']}\n人数は{schedule_data['num_of_people']}人\n送るギフトの価格帯は~¥100\nで予定登録が完了したのだ！")
 
             ]
             
@@ -394,8 +425,8 @@ def handle_postback(events):
         group_id = events.source.group_id
         group = db.collection('groups').document(group_id)
         schedule_id = group.get().to_dict()["schedule_id"]
-        
         schedules_doc = schedules_doc_ref.document(schedule_id)
+        schedule_data = schedules_doc.get().to_dict()
         
         schedules_doc.update({
             'min_price': 101,
@@ -406,7 +437,7 @@ def handle_postback(events):
             events.reply_token,
             [
                 TextSendMessage(text="ギフトの値段が¥101~¥300に設定されたのだ！"),
-                TextSendMessage(text="これで予定登録完了なのだ！")
+                TextSendMessage(text=f"約束の時間は{schedule_data['datetime']}\n人数は{schedule_data['num_of_people']}人\n送るギフトの価格帯は¥101~¥300\nで予定登録が完了したのだ！")
             ]
             
         )
@@ -415,6 +446,7 @@ def handle_postback(events):
         group = db.collection('groups').document(group_id)
         schedule_id = group.get().to_dict()["schedule_id"] 
         schedules_doc = schedules_doc_ref.document(schedule_id)
+        schedule_data = schedules_doc.get().to_dict()
         
         schedules_doc.update({
             'min_price': 301,
@@ -425,7 +457,7 @@ def handle_postback(events):
             events.reply_token,
             [
                 TextSendMessage(text="ギフトの値段が¥301~¥500に設定されたのだ！"),
-                TextSendMessage(text="これで予定登録完了なのだ！")
+                TextSendMessage(text=f"約束の時間は{schedule_data['datetime']}\n人数は{schedule_data['num_of_people']}人\n送るギフトの価格帯は¥301~¥500\nで予定登録が完了したのだ！")
             ]
             
         )
